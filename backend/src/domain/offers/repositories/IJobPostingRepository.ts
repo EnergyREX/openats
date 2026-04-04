@@ -9,7 +9,7 @@ export interface IJobPostingRepository {
     save(value: JobPosting): Promise<Result<void, saveJobPostingError>>;
 
     getAll(): Promise<Result<JobPosting[], getJobPostingError>>
-    getSingle(uuid: string): Promise<Result<JobPosting, getJobPostingError>>
+    getByUUID(uuid: string): Promise<Result<JobPosting, getJobPostingError>>
 
     update(value: JobPosting): Promise<Result<void, updateJobPostingError>>
     delete(uuid: string): Promise<Result<void, deleteJobPostingError>>

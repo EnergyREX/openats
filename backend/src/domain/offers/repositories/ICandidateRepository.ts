@@ -9,7 +9,7 @@ export interface ICandidateRepository {
     save(value: Candidate): Promise<Result<void, saveCandidateError>>;
 
     getAll(): Promise<Result<Candidate[], getCandidateError>>
-    getSingle(uuid: string): Promise<Result<Candidate, getCandidateError>>
+    getByUUID(uuid: string): Promise<Result<Candidate, getCandidateError>>
     getInOffer(uuid: string): Promise<Result<Candidate[], getCandidateError>>
 
     update(value: Candidate): Promise<Result<void, updateCandidateError>>

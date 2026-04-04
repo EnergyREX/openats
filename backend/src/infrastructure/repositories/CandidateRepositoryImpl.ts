@@ -62,7 +62,7 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
         }
     }
 
-    async getSingle(uuid: string): Promise<Result<Candidate, getCandidateError>> {
+    async getByUUID(uuid: string): Promise<Result<Candidate, getCandidateError>> {
         try {
             const [raw] = await db.select().from(candidates).where(eq(candidates.uuid, uuid))
             if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_CANDIDATE" } }

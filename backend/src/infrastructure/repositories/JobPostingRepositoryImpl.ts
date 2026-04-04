@@ -57,7 +57,7 @@ export class JobPostingRepositoryImpl implements IJobPostingRepository {
         }
     }
 
-    async getSingle(uuid: string): Promise<Result<JobPosting, getJobPostingError>> {
+    async getByUUID(uuid: string): Promise<Result<JobPosting, getJobPostingError>> {
         try {
             const [raw] = await db.select().from(jobPostings).where(eq(jobPostings.uuid, uuid))
             if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_JOB_POSTING" } }

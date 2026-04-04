@@ -55,7 +55,7 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
         }
     }
 
-    async getSingle(uuid: string): Promise<Result<Application, getApplicationError>> {
+    async getByUUID(uuid: string): Promise<Result<Application, getApplicationError>> {
         try {
             const [raw] = await db.select().from(applications).where(eq(applications.uuid, uuid))
             if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_APPLICATION" } }

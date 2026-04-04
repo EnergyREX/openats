@@ -9,7 +9,7 @@ export interface IApplicationRepository {
     save(value: Application): Promise<Result<void, saveApplicationError>>;
 
     getAll(): Promise<Result<Application[], getApplicationError>>
-    getSingle(uuid: string): Promise<Result<Application, getApplicationError>>
+    getByUUID(uuid: string): Promise<Result<Application, getApplicationError>>
     getByOffer(uuid: string): Promise<Result<Application[], getApplicationError>>
 
     update(value: Application): Promise<Result<void, updateApplicationError>>
