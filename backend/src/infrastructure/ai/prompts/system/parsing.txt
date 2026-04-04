@@ -19,8 +19,7 @@ Schema:
   "projects": [{ "title": string, "description": string }],
   "volunteering": string[],
   "languages": [{ "language": string, "level": string }],
-  "additional_info": string[],
-  "score": null
+  "additional_info": string[]
 }
 
 Rules
@@ -28,7 +27,6 @@ Rules
 General
 - Missing fields use empty string "" or empty array [].
 - Do not add, rename or remove any keys.
-- "score" is always null.
 
 work_experience
 - Each job position must be a SEPARATE object. Never merge multiple positions into one.
