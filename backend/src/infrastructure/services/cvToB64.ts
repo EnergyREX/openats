@@ -42,9 +42,7 @@ export class cvToB64Service {
 
         // Convert to base64
         const b64Img: string = buffer.toString('base64')
-
-        console.log(b64Img)
-
+        
         return { ok: true, value: b64Img }
     
     }
