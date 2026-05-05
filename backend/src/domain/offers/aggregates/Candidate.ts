@@ -1,43 +1,103 @@
 import { ContactDetails } from "../value-objects/ContactDetails.ts";
-import { WorkEntry } from "../value-objects/WorkEntry.ts";
+
+export interface WorkExperience {
+    company: string
+    location?: string
+    role: string
+    duration: string
+    responsibilities: string[]
+}
+
+export interface CandidateEducation {
+    title: string
+    institution: string
+    duration: string
+    gpa?: string
+}
+
+export interface CandidateCertification {
+    title: string
+    institution: string
+    duration: string
+}
+
+export interface CandidateProject {
+    title: string
+    description?: string
+}
+
+export interface CandidateLanguage {
+    language: string
+    level: string
+}
 
 export class Candidate {
-    private readonly uuid: string
-    private readonly name: string
-    private readonly title: string
-    private readonly about: string
-    private readonly experience?: WorkEntry[]
-    private readonly contactDetails: ContactDetails
-    private readonly skills: string[]
-    private readonly projects?: WorkEntry[]
-
     constructor(
-        uuid: string, name: string, 
-        title: string, about: string, 
-        experience: WorkEntry[] | undefined,
-        contactDetails: ContactDetails, 
-        skills: string[], 
-        projects?: WorkEntry[] | undefined) {
+        private uuid: string,
+        private readonly name: string,
+        private readonly title: string,
+        private readonly about: string,
+        private readonly contactDetails: ContactDetails,
+        private readonly skills: string[],
+        private readonly cvPath: string,
+        private readonly experience?: WorkExperience[],
+        private readonly projects?: CandidateProject[],
+        private readonly education?: CandidateEducation[],
+        private readonly certifications?: CandidateCertification[],
+        private readonly languages?: CandidateLanguage[],
+        private readonly volunteering?: string[],
+        private readonly additionalInfo?: string[],
+    ) { }
 
-        this.uuid = uuid
-        this.name = name;
-        this.title = title;
-        this.about = about;
-        this.experience = experience
-        this.contactDetails = contactDetails;
-        this.skills = skills
-        this.projects = projects
+    toJson(): unknown { return {
+        uuid: this.uuid,
+        name: this.name,
+        title: this.title,
+        about: this.about,
+        contactDetails: this.contactDetails.toJson(),
+        skills: this.skills,
+        cvPath: this.cvPath,
+        experience: this.experience?.toString(),
+        projects: this.projects?.toString(),
+        education: this.education?.toString(),
+        certifications: this.certifications?.toString(),
+        languages: this.languages?.toString(),
+        volunteering: this.volunteering,
+        additionalInfo: this.additionalInfo
+    } }
+
+    toString(): string {
+        return JSON.stringify({
+            uuid: this.uuid,
+            name: this.name,
+            title: this.title,
+            about: this.about,
+            contactDetails: this.contactDetails.toJson(),
+            skills: this.skills,
+            cvPath: this.cvPath,
+            experience: this.experience,
+            projects: this.projects,
+            education: this.education,
+            certifications: this.certifications,
+            languages: this.languages,
+            volunteering: this.volunteering,
+            additionalInfo: this.additionalInfo
+        })
     }
 
     getUuid(): string { return this.uuid }
-    getName(): string { return this.name; }
-    getTitle(): string { return this.title; }
-    getAbout(): string { return this.about; }
-    getExperience(): WorkEntry[] | undefined { return this.experience }
-    getRequirements(): string[] { return this.skills; }
-    getContactDetails(): ContactDetails { return this.contactDetails; }
+    setUuid(uuid: string): void { this.uuid = uuid }
+    getName(): string { return this.name }
+    getTitle(): string { return this.title }
+    getAbout(): string { return this.about }
+    getContactDetails(): ContactDetails { return this.contactDetails }
     getSkills(): string[] { return this.skills }
-    getProjects(): WorkEntry[] | undefined { return this.projects }
-
-
+    getExperience(): WorkExperience[] | undefined { return this.experience }
+    getProjects(): CandidateProject[] | undefined { return this.projects }
+    getEducation(): CandidateEducation[] | undefined { return this.education }
+    getCertifications(): CandidateCertification[] | undefined { return this.certifications }
+    getLanguages(): CandidateLanguage[] | undefined { return this.languages }
+    getVolunteering(): string[] | undefined { return this.volunteering }
+    getAdditionalInfo(): string[] | undefined { return this.additionalInfo }
+    getCvPath(): string { return this.cvPath }
 }

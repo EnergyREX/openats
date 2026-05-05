@@ -3,5 +3,6 @@ type OllamaParams = {
     prompt: string,
     system?: string,
     images?: string[],
-    stream?: boolean
+    stream?: boolean,
+    temperature?: number
 }

@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 
 import routes from './presentation/routes/routes.ts'
 import plugins from './config/plugins.ts'
+import redis from './config/redis.ts'
 
 const API_PORT: number = Number(process.env.API_PORT) || 6500
 const fastify = Fastify({
@@ -16,6 +17,7 @@ const fastify = Fastify({
   }
 })
 
+await redis.connect()
 await fastify.register(plugins)
 await fastify.register(routes)
 

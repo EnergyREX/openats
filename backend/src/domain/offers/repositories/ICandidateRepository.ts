@@ -6,11 +6,12 @@ import { updateCandidateError } from "../errors/candidate/updateCandidate.error.
 import { deleteCandidateError } from "../errors/candidate/deleteCandidate.error.ts";
 
 export interface ICandidateRepository {
-    save(value: Candidate): Promise<Result<void, saveCandidateError>>;
+    save(value: Candidate): Promise<Result<string, saveCandidateError>>;
 
     getAll(): Promise<Result<Candidate[], getCandidateError>>
     getByUUID(uuid: string): Promise<Result<Candidate, getCandidateError>>
     getInOffer(uuid: string): Promise<Result<Candidate[], getCandidateError>>
+    getByEmail(email: string): Promise<Result<Candidate, getCandidateError>>
 
     update(value: Candidate): Promise<Result<void, updateCandidateError>>
     delete(uuid: string): Promise<Result<void, deleteCandidateError>>

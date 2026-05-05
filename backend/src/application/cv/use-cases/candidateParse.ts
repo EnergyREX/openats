@@ -1,28 +1,36 @@
-import { OllamaClient } from "src/infrastructure/clients/ollama/OllamaClient.ts"
 import { cvToB64Service } from "../../../infrastructure/services/cvToB64.ts"
 import { PromptService } from "src/infrastructure/ai/PromptService.ts"
+import { IAIClient } from "src/domain/shared/ports/IAIClient.ts"
+import { CandidateFactory } from "src/domain/offers/factories/Candidate.factory.ts"
+import { ICandidateRepository } from "src/domain/offers/repositories/ICandidateRepository.ts"
+import { getFileByPath } from "src/infrastructure/services/getFileByPath.ts"
 
 // This function parses a CV to create a new Candidate and after a new application.
-export async function candidateParse(buffer: Buffer, filename: string) {
+export async function candidateParse(
+    filePath: string,
+    vlm: IAIClient,
+    candidateRepository: ICandidateRepository,
+    data: { name: string, email: string, phoneNum?: string, website?: string }) {
     // Await receiving a CV.
     const service = new cvToB64Service()
     const promptService = new PromptService()
+    const filename = filePath.split('/').at(-1)!    
 
-    const prompt = promptService.getParsingPrompts()
+    const prompts = promptService.getParsingPrompts()
+    const file = await getFileByPath(filePath)
     
     // Parse the CV to create a new Candidate in db.
-    const adaptedImage = await service.exec(buffer, filename)
+    const adaptedImage = await service.exec(file, filename)
 
     if (!adaptedImage.ok) {
         return { ok: false, error: { message: adaptedImage.error.message, code: adaptedImage.error.code } }
     }
-
-    const vlm = new OllamaClient()
+    
     const result = await vlm.generate({
         model: process.env.VL_MODEL || 'qwen2.5vl:7b',
-        system: prompt.system,
-        prompt: prompt.prompt,
-        images: [adaptedImage.value],
+        system: prompts.system,
+        prompt: prompts.prompt,
+        image: adaptedImage.value,
         stream: false
     })
 
@@ -31,16 +39,45 @@ export async function candidateParse(buffer: Buffer, filename: string) {
     }
 
     try {
-        const raw = result.response as string
-        const parsed = JSON.parse(raw)
-        return { ok: true, value: parsed }
+        const raw = result
+        const parsed = JSON.parse(raw as string)
+
+            const candidate = CandidateFactory.create(
+                "",
+                data.name,
+                parsed.title,
+                parsed.profile,
+                {
+                    phoneNumber: data.phoneNum ? data.phoneNum : parsed.contact.phone,
+                    email: data.email,
+                    address: parsed.contact.location,
+                    website: data.website ? data.website : parsed.contact.website,
+                    github: parsed.contact.github,
+                    linkedin: parsed.contact.linkedin,
+                },
+                parsed.skills,
+                filePath,
+                parsed.work_experience,
+                parsed.projects,
+                parsed.education,
+                parsed.certifications ? parsed.certifications : [],
+                parsed.languages ? parsed.languages : [],
+                parsed.volunteering ? parsed.volunteering : [],
+                parsed.additional_info ? parsed.additional_info : []
+            )
+        
+            const saveResult = await candidateRepository.save(candidate)
+
+            if (!saveResult.ok) return { ok: false, error: { message: saveResult.error.message, code: saveResult.error.code } }
+            
+            candidate.setUuid(saveResult.value)
+
+        return { ok: true, value: candidate }
     } catch (err) {
         if (err instanceof Error) {
             return { ok: false, error: { message: err.message, code: "ERR_CV_CANT_PARSE" } }
         } else {
             return { ok: false, error: { message: "Unknown error", code: "ERR_CV_CANT_PARSE" } }
         }
-    }
-    // After creating the Candidate, a new queue begins to run to create (and submit the application)
-    
+    }    
 }

@@ -1,6 +1,14 @@
 import { ContactDetails } from "../value-objects/ContactDetails.ts"
-import { WorkEntry } from "../value-objects/WorkEntry.ts"
-import { Candidate } from "../aggregates/Candidate.ts"
+import { Candidate, CandidateCertification, CandidateEducation, CandidateLanguage, CandidateProject, WorkExperience } from "../aggregates/Candidate.ts"
+
+type ContactDetailsParams = {
+    phoneNumber?: string
+    address?: string
+    email?: string
+    website?: string
+    github?: string
+    linkedin?: string
+}
 
 export class CandidateFactory {
     static create(
@@ -8,36 +16,32 @@ export class CandidateFactory {
         name: string,
         title: string,
         about: string,
+        contactDetails: ContactDetailsParams,
         skills: string[],
-        contactDetails: {
-            phoneNumber?: string,
-            address?: string,
-            email?: string
-        },
-        experience?: {
-            title: string,
-            fromDate: Date,
-            toDate: Date,
-            description?: string,
-            additionalFields?: Record<string, string>
-        }[],
-        projects?: {
-            title: string,
-            fromDate: Date,
-            toDate: Date,
-            description?: string,
-            additionalFields?: Record<string, string>
-        }[]
+        cvPath: string,
+        experience?: WorkExperience[],
+        projects?: CandidateProject[],
+        education?: CandidateEducation[],
+        certifications?: CandidateCertification[],
+        languages?: CandidateLanguage[],
+        volunteering?: string[],
+        additionalInfo?: string[]
     ): Candidate {
+        const contact = new ContactDetails(
+            contactDetails.phoneNumber,
+            contactDetails.address,
+            contactDetails.email,
+            contactDetails.website,
+            contactDetails.github,
+            contactDetails.linkedin
+        )
+
         return new Candidate(
-            uuid,
-            name,
-            title,
-            about,
-            experience?.map(e => new WorkEntry(e.title, e.fromDate, e.toDate, e.description, e.additionalFields)),
-            new ContactDetails(contactDetails.phoneNumber, contactDetails.address, contactDetails.email),
-            skills,
-            projects?.map(p => new WorkEntry(p.title, p.fromDate, p.toDate, p.description, p.additionalFields))
+            uuid, name, title, about,
+            contact, skills, cvPath,
+            experience, projects, education,
+            certifications, languages,
+            volunteering, additionalInfo
         )
     }
 }

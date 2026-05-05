@@ -1,9 +1,9 @@
-import { OllamaClient } from "src/infrastructure/clients/ollama/OllamaClient.ts";
+import { IAIClient } from "src/domain/shared/ports/IAIClient.ts";
 
-export async function getAvailableModels() {
+export async function getAvailableModels(client: IAIClient) {
     try {
-        const client = new OllamaClient()
-        return { ok: true, value: await client.models() }
+        const models = await client.models()
+        return { ok: true, value: models }
     } catch (err) {
         if (err instanceof Error) {
             return { ok: false, error: { message: err.message, code: "ERR_APP_GET_MODELS", cause: err.cause } }

@@ -6,10 +6,12 @@ import { saveApplicationError } from '../errors/application/saveApplication.erro
 import { updateApplicationError } from '../errors/application/updateApplication.error.ts';
 
 export interface IApplicationRepository {
-    save(value: Application): Promise<Result<void, saveApplicationError>>;
+    save(value: Application): Promise<Result<string, saveApplicationError>>;
 
     getAll(): Promise<Result<Application[], getApplicationError>>
     getByUUID(uuid: string): Promise<Result<Application, getApplicationError>>
+    getByCandidateUUID(uuid: string): Promise<Result<Application, getApplicationError>>
+    getByCandidateAndOfferUUID(candidate: string, offer: string): Promise<Result<Application, getApplicationError>>
     getByOffer(uuid: string): Promise<Result<Application[], getApplicationError>>
 
     update(value: Application): Promise<Result<void, updateApplicationError>>

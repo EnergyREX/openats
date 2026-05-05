@@ -14,13 +14,13 @@ export function getConnectionString() {
 }
 
 export async function testDBConnection() {
-    try {
         const health = await db.execute("SELECT 1")
         
-        return true
-    } catch (err) {
-        return false
-    }
+        if (health) {
+            return true
+        } else {
+            return false
+        }
 }
  
 const db = drizzle(getConnectionString());

@@ -20,6 +20,24 @@ export class JobPosting {
         this.contactDetails = contactDetails
         this.requirements = requirements
     }
+    toJson() {
+        return {
+            uuid: this.uuid,
+            title: this.title,
+            body: this.body,
+            contactDetails: this.contactDetails.toJson(),
+            requirements: this.requirements
+        }
+    }
+    toString(): string {
+        return JSON.stringify({
+            uuid: this.uuid,
+            title: this.title,
+            body: this.body,
+            contactDetails: this.contactDetails.toJson(),
+            requirements: [...this.requirements]
+        })
+    }
     getUuid(): string { return this.uuid }
     getTitle(): string { return this.title }
     getBody(): string { return this.body }

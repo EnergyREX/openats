@@ -6,7 +6,7 @@ import { saveJobPostingError } from '../errors/jobposting/saveJobPosting.error.t
 import { updateJobPostingError } from '../errors/jobposting/updateJobPosting.error.ts';
 
 export interface IJobPostingRepository {
-    save(value: JobPosting): Promise<Result<void, saveJobPostingError>>;
+    save(value: JobPosting): Promise<Result<string, saveJobPostingError>>;
 
     getAll(): Promise<Result<JobPosting[], getJobPostingError>>
     getByUUID(uuid: string): Promise<Result<JobPosting, getJobPostingError>>

@@ -20,10 +20,13 @@ export class JobPostingFactory {
             title,
             body,
             new ContactDetails(
-                contactDetails.name,
                 contactDetails.phoneNumber,
                 contactDetails.address,
-                contactDetails.email
+                contactDetails.email,
+                undefined,
+                undefined,
+                undefined,
+                contactDetails.name
             ),
             requirements
         )

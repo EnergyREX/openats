@@ -8,6 +8,7 @@ import { LogoutRequest } from "../../types/request/LogoutRequest.ts"
 
 export default async function (fastify: FastifyInstance, opts: FastifyPluginOptions) {
     fastify.post('/register', {
+        preHandler: [fastify.authenticate, fastify.hasPermission('users:write')],
         schema: {
             summary: "Registers an user by given parameters and sends an email to its email.",
             tags: ["Auth"]
@@ -28,6 +29,7 @@ export default async function (fastify: FastifyInstance, opts: FastifyPluginOpti
     });
 
     fastify.post('/login', {
+        preHandler: [fastify.rateLimit({ max: 10, timeWindow: '20 minutes' })],
         schema: {
             description: "Allows to use the API. Sends two JWT cookies, a refresh one and an access one.",
             tags: ["Auth"]
@@ -64,14 +66,13 @@ export default async function (fastify: FastifyInstance, opts: FastifyPluginOpti
                 })
             }
         } catch (err) {
-            reply.code(400).send({
-                success: false,
-                error: err
-            })
+            const message = err instanceof Error ? err.message : 'Unknown error'
+            reply.code(400).send({ success: false, error: { message } })
         }
     });
 
     fastify.post('/refresh', {
+        preHandler: [fastify.rateLimit({ max: 10, timeWindow: '20 minutes' })],
         schema: {
             summary: "Allows to refresh a token to the user if needed.",
             tags: ["Auth"]
@@ -99,6 +100,7 @@ export default async function (fastify: FastifyInstance, opts: FastifyPluginOpti
     });
 
     fastify.post('/logout', {
+        preHandler: [fastify.rateLimit({ max: 10, timeWindow: '20 minutes' })],
         schema: {
             description: "Allows to log out users.",
             tags: ["Auth"]
