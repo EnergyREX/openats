@@ -35,11 +35,13 @@ export class HttpClient {
                 "Content-Type": 'application/json',
                 ...this.defaultHeaders
             },
-            body: body ? JSON.stringify(body) : undefined
+            body: body ? JSON.stringify(body) : undefined,
+            signal: AbortSignal.timeout(900_000)
         })
 
         if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`)
+            const errorBody = await res.json() 
+            throw new Error(`HTTP ${res.status}: ${JSON.stringify(errorBody)}`)
         }
 
         return res.json() as Promise<T>
