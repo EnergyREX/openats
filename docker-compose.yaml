@@ -43,6 +43,7 @@ services:
       - ./backend/.env
     environment:
       - DB_HOST=db
+      - DB_PORT=5432
       - REDIS_HOST=redis
     depends_on:
       db:
@@ -55,10 +56,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.worker
+    volumes:
+      - ./backend/src/infrastructure/storage:/app/src/infrastructure/storage
     env_file:
       - ./backend/.env
     environment:
       - DB_HOST=db
+      - DB_PORT=5432
       - REDIS_HOST=redis
     depends_on:
       db:
