@@ -1,0 +1,27 @@
+info:
+  name: Create Job Posting
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/offers"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "",
+        "body": "",
+        "contactDetails": {
+          "name": "",
+          "email": "",
+          "phoneNumber": ""
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

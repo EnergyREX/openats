@@ -1,0 +1,27 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/login"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "energyrex@test.com",
+        "password": "adminPassword123"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: bru.setEnvVar("accessToken", res.body.token)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

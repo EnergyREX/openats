@@ -1,0 +1,33 @@
+info:
+  name: Candidate Postulation
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/postulation/025a4c96-b550-438e-a68f-67bf3c1ac1eb"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: text
+        value: ""
+      - name: name
+        type: text
+        value: ""
+      - name: email
+        type: file
+        value: []
+      - name: website
+        type: text
+        value: ""
+      - name: phoneNum
+        type: text
+        value: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

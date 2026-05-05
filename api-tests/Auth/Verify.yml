@@ -1,0 +1,19 @@
+info:
+  name: Verify
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/verify?code=4orN1dlcJBFATrWPUnu470rO-n5yhlmpaVnlNq6S1sY"
+  params:
+    - name: code
+      value: 4orN1dlcJBFATrWPUnu470rO-n5yhlmpaVnlNq6S1sY
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

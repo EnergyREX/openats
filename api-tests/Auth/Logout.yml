@@ -1,0 +1,20 @@
+info:
+  name: Logout
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/logout"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: bru.deleteEnvVar('accessToken')
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

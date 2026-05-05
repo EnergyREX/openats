@@ -1,0 +1,23 @@
+info:
+  name: Register
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/register"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "ener",
+        "email": "energyrex@att.com",
+        "password": "adminPassword123"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
