@@ -1,9 +1,9 @@
 import { Result } from "../../../domain/shared/types/Result.ts";
-import { UserFactory } from "../../../domain/users/factories/User.factory.ts";
 import { IUserRepository } from "../../../domain/users/repositories/IUserRepository.ts";
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { RegisterError } from "../errors/register.error.ts";
+import { User } from "src/domain/users/aggregates/User.ts";
 
 export async function register(
     name: string, email: string, password: string, repository: IUserRepository): 
@@ -16,10 +16,9 @@ export async function register(
     }
     
     try {
-        const factory = new UserFactory()
         const uuid = crypto.randomUUID()
         const hashedPassword = await bcrypt.hash(password, 12)
-        const user = await factory.create(uuid, name, email, hashedPassword, false)
+        const user = await User.create(uuid, name, email, hashedPassword, false)
         const verificationCode = await crypto.randomBytes(32).toString('base64url')
 
         const saveResult = await repository.save(user, verificationCode)

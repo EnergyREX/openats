@@ -2,7 +2,6 @@ import db from '../../config/database.ts'
 import { Result } from '../../domain/shared/types/Result.ts'
 import { User } from '../../domain/users/aggregates/User.ts'
 import { UserRepositoryError } from '../../domain/users/errors/UserRepositoryError.ts'
-import { UserFactory } from '../../domain/users/factories/User.factory.ts'
 import { IUserRepository } from '../../domain/users/repositories/IUserRepository.ts'
 import { revokedTokens } from '../drizzle/schema/revokedTokens.ts'
 import { users } from '../drizzle/schema/users.ts'
@@ -58,8 +57,7 @@ export class UserRepositoryImpl implements IUserRepository {
         try {
             const data = await db.select().from(users).where(eq(users.uuid, uuid))
 
-            const factory = new UserFactory()
-            const user = factory.create(data[0].uuid, data[0].name, data[0].email, data[0].password, data[0].verified)
+            const user = User.create(data[0].uuid, data[0].name, data[0].email, data[0].password, data[0].verified)
 
             if (user) {
                 return { ok: true, value: user }
@@ -85,8 +83,7 @@ export class UserRepositoryImpl implements IUserRepository {
                 return { ok: false, error: { message: "User not found", code: "ERR_USER_NOT_FOUND" }}
             }
 
-            const factory = new UserFactory()
-            const user = factory.create(data[0].uuid, data[0].name, data[0].email, data[0].password, data[0].verified)
+            const user = User.create(data[0].uuid, data[0].name, data[0].email, data[0].password, data[0].verified)
 
             return { ok: true, value: user }
 
