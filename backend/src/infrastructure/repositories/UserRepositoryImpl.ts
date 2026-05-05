@@ -11,8 +11,6 @@ import { eq } from 'drizzle-orm'
 export class UserRepositoryImpl implements IUserRepository {
 
     async save(user: User, verificationCode: string): Promise<Result<void, UserRepositoryError>> {
-        
-        
         try {
             await db.insert(users).values({
                 uuid: user.getUUID(),
