@@ -21,7 +21,7 @@ await redis.connect()
 await fastify.register(plugins)
 await fastify.register(routes)
 
-fastify.listen({ port: API_PORT }, function (err) {
+fastify.listen({ port: API_PORT, host: '0.0.0.0' }, function (err) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)
