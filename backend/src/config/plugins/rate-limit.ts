@@ -5,7 +5,7 @@ import { FastifyPluginAsync } from 'fastify'
 const rateLimits: FastifyPluginAsync = async (fastify) => {
     await fastify.register(rateLimit, {
         global: false,
-        max: 10,
+        max: 5,
         timeWindow: 14400000,
         hook: 'preHandler',
         cache: 10000,
