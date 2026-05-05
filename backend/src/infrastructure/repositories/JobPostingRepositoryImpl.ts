@@ -12,73 +12,59 @@ import { jobPostings } from "../drizzle/schema/jobPostings.ts";
 
 export class JobPostingRepositoryImpl implements IJobPostingRepository {
 
-    async save(value: JobPosting): Promise<Result<void, saveJobPostingError>> {
+    private mapRowToJobPosting(d: typeof jobPostings.$inferSelect) {
+        return JobPostingFactory.create(
+                d.uuid,
+                d.title,
+                d.body,
+                {
+                    name: d.recruiterName ?? undefined,
+                    phoneNumber: d.recruiterPhone ?? undefined,
+                    email: d.recruiterEmail ?? undefined,
+                }
+        )
+    }
+
+    async save(value: JobPosting): Promise<Result<string, saveJobPostingError>> {
         try {
-            await db.insert(jobPostings).values({
-                uuid: value.getUuid(),
+            const [{ uuid }] = await db.insert(jobPostings).values({
+                uuid: crypto.randomUUID(),
                 title: value.getTitle(),
                 body: value.getBody(),
                 recruiterName: value.getContactDetails().getName(),
                 recruiterEmail: value.getContactDetails().getEmail() ?? null,
                 recruiterPhone: value.getContactDetails().getPhoneNumber() ?? null,
-            })
-            return { ok: true, value: undefined }
+            }).returning({uuid: jobPostings.uuid})
+            return { ok: true, value: uuid }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_JOB_POSTING_STORE" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_JOB_POSTING_STORE" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_JOB_POSTING_STORE" } }
+            return { ok: false, error: { message: "Unknown error", code: "ERR_JOB_POSTING_STORE" } } 
         }
     }
 
     async getAll(): Promise<Result<JobPosting[], getJobPostingError>> {
         try {
             const rawData = await db.select().from(jobPostings)
-            const data: JobPosting[] = rawData.map(d =>
-                JobPostingFactory.create(
-                    d.uuid,
-                    d.title,
-                    d.body,
-                    {
-                        name: d.recruiterName ?? undefined,
-                        phoneNumber: d.recruiterPhone ?? undefined,
-                        email: d.recruiterEmail ?? undefined,
-                    }
-                )
-            )
+            const data: JobPosting[] = rawData.map((d) => this.mapRowToJobPosting(d))
             return { ok: true, value: data }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_JOB_POSTING" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_JOB_POSTING" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_JOB_POSTING" } }
+            return { ok: false, error: { message: "Unknown error", code: "ERR_GET_JOB_POSTING" } } 
         }
     }
 
     async getByUUID(uuid: string): Promise<Result<JobPosting, getJobPostingError>> {
         try {
-            const [raw] = await db.select().from(jobPostings).where(eq(jobPostings.uuid, uuid))
-            if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_JOB_POSTING" } }
-
-            const data = JobPostingFactory.create(
-                raw.uuid,
-                raw.title,
-                raw.body,
-                {
-                    name: raw.recruiterName ?? undefined,
-                    phoneNumber: raw.recruiterPhone ?? undefined,
-                    email: raw.recruiterEmail ?? undefined,
-                }
-            )
+            const [row] = await db.select().from(jobPostings).where(eq(jobPostings.uuid, uuid))
+            
+            if (!row) return { ok: false, error: { message: "Not found", code: "ERR_GET_JOB_POSTING" }} 
+            //console.log(rawData)
+            const data: JobPosting = this.mapRowToJobPosting(row)
+            
             return { ok: true, value: data }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_JOB_POSTING" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_JOB_POSTING" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_JOB_POSTING" } }
+            return { ok: false, error: { message: "Unknown error", code: "ERR_GET_JOB_POSTING" } } 
         }
     }
 
@@ -95,11 +81,8 @@ export class JobPostingRepositoryImpl implements IJobPostingRepository {
                 .where(eq(jobPostings.uuid, value.getUuid()))
             return { ok: true, value: undefined }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_JOB_POSTING_UPDATE" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_JOB_POSTING_UPDATE" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_JOB_POSTING_UPDATE" } }
+            return { ok: false, error: { message: "Unknown error", code: "ERR_JOB_POSTING_UPDATE" } } 
         }
     }
 
@@ -108,11 +91,8 @@ export class JobPostingRepositoryImpl implements IJobPostingRepository {
             await db.delete(jobPostings).where(eq(jobPostings.uuid, uuid))
             return { ok: true, value: undefined }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_DELETE_JOB_POSTING" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_DELETE_JOB_POSTING" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_DELETE_JOB_POSTING" } }
+            return { ok: false, error: { message: "Unknown error", code: "ERR_DELETE_JOB_POSTING" } } 
         }
     }
 }

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import db from "../../config/database.ts";
 import { Application } from "../../domain/offers/aggregates/Application.ts";
 import { deleteApplicationError } from "../../domain/offers/errors/application/deleteApplication.error.ts";
@@ -12,46 +12,48 @@ import { applications } from "../drizzle/schema/applications.ts";
 
 export class ApplicationRepositoryImpl implements IApplicationRepository {
 
-    async save(value: Application): Promise<Result<void, saveApplicationError>> {
+    private mapRowApplication(d: typeof applications.$inferSelect): Application {
+        return ApplicationFactory.create(
+            d.uuid,
+            d.offerUuid,
+            d.candidateUuid,
+            d.annotations ?? [],
+            (d.suggestedStatus as "discarded" | "interview" | "review") ?? "review",
+            d.score ?? undefined,
+            d.discarded ?? undefined,
+            d.discardReason ?? undefined
+        )
+    }
+
+    async save(value: Application): Promise<Result<string, saveApplicationError>> {
         try {
-            await db.insert(applications).values({
-                uuid: value.getUuid(),
+            // console.log('[save] annotations:', JSON.stringify(value.getAnnotations()))
+            const [{ uuid }] = await db.insert(applications).values({
+                uuid: crypto.randomUUID(),
                 offerUuid: value.getOfferUuid(),
                 candidateUuid: value.getCandidateUuid(),
                 score: value.getScore() ?? null,
                 annotations: value.getAnnotations(),
-                isValid: value.getIsValid() ?? null,
-            })
-            return { ok: true, value: undefined }
+                discarded: value.getIsDiscarded() ?? false,
+                suggestedStatus: value.getSuggestedStatus(),
+                discardReason: value.getDiscardReason() ?? "",
+            }).returning({ uuid: applications.uuid })
+
+            return { ok: true, value: uuid }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_SAVE_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_SAVE_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_SAVE_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_SAVE_APPLICATION" } }
         }
     }
 
     async getAll(): Promise<Result<Application[], getApplicationError>> {
         try {
             const rawData = await db.select().from(applications)
-            const data: Application[] = rawData.map(d =>
-                ApplicationFactory.create(
-                    d.uuid,
-                    d.offerUuid,
-                    d.candidateUuid,
-                    d.score ?? undefined,
-                    d.annotations ?? undefined,
-                    d.isValid ?? undefined,
-                )
-            )
+            const data: Application[] = rawData.map(d => this.mapRowApplication(d))
             return { ok: true, value: data }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_GET_APPLICATION" } }
         }
     }
 
@@ -60,44 +62,47 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             const [raw] = await db.select().from(applications).where(eq(applications.uuid, uuid))
             if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_APPLICATION" } }
 
-            const data = ApplicationFactory.create(
-                raw.uuid,
-                raw.offerUuid,
-                raw.candidateUuid,
-                raw.score ?? undefined,
-                raw.annotations ?? undefined,
-                raw.isValid ?? undefined,
-            )
+            const data: Application = this.mapRowApplication(raw)
+
             return { ok: true, value: data }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_GET_APPLICATION" } }
+        }
+    }
+
+    async getByCandidateUUID(uuid: string): Promise<Result<Application, getApplicationError>> {
+        try {
+            const [ raw ] = await db.select().from(applications).where(eq(applications.candidateUuid, uuid))
+            if (!raw) return { ok: false, error: { message: 'Not found', code: "ERR_GET_APPLICATION" } }
+            const data = this.mapRowApplication(raw)
+            return { ok: true, value: data }
+        } catch (err) {
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_GET_APPLICATION" } }
+        }
+    }
+
+    async getByCandidateAndOfferUUID(candidate: string, offer: string): Promise<Result<Application, getApplicationError>> {
+        try {
+            const [ raw ] = await db.select().from(applications).where(and(eq(applications.candidateUuid, candidate), eq(applications.offerUuid, offer)))
+            if (!raw) return { ok: false, error: { message: 'Not found', code: "ERR_GET_APPLICATION" } }
+            const data = this.mapRowApplication(raw)
+            return { ok: true, value: data }
+        } catch (err) {
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_GET_APPLICATION" } }
         }
     }
 
     async getByOffer(offerUuid: string): Promise<Result<Application[], getApplicationError>> {
         try {
             const rawData = await db.select().from(applications).where(eq(applications.offerUuid, offerUuid))
-            const data: Application[] = rawData.map(d =>
-                ApplicationFactory.create(
-                    d.uuid,
-                    d.offerUuid,
-                    d.candidateUuid,
-                    d.score ?? undefined,
-                    d.annotations ?? undefined,
-                    d.isValid ?? undefined,
-                )
-            )
+            const data: Application[] = rawData.map(d => this.mapRowApplication(d))
             return { ok: true, value: data }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_GET_APPLICATION" } }
         }
     }
 
@@ -107,16 +112,13 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
                 .set({
                     score: value.getScore() ?? null,
                     annotations: value.getAnnotations(),
-                    isValid: value.getIsValid() ?? null,
+                    discarded: value.getIsDiscarded() ?? null,
                 })
                 .where(eq(applications.uuid, value.getUuid()))
             return { ok: true, value: undefined }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_UPDATE_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_UPDATE_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_UPDATE_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_UPDATE_APPLICATION" } }
         }
     }
 
@@ -125,11 +127,8 @@ export class ApplicationRepositoryImpl implements IApplicationRepository {
             await db.delete(applications).where(eq(applications.uuid, uuid))
             return { ok: true, value: undefined }
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_DELETE_APPLICATION" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_DELETE_APPLICATION" } }
-            }
+            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_DELETE_APPLICATION" } }
+            return { ok: false, error: { message: 'Unknown error', code: "ERR_DELETE_APPLICATION" } }
         }
     }
 }
