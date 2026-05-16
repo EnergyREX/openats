@@ -32,7 +32,7 @@ export class UserRepositoryImpl implements IUserRepository {
         const user = await db.select().from(users).where(eq(users.verificationCode, verificationCode))
 
         if (user.length > 0) {
-            await db.update(users).set({ verified: true, verificationCode: "" })
+            await db.update(users).set({ verified: true, verificationCode: "" }).where(eq(users.verificationCode, verificationCode))
             return { ok: true, value: undefined }
         } else {
             return { ok: false, error: { message: "Could not verify the user", code: "ERR_USER_NOT_FOUND" } }
