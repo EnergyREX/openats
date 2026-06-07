@@ -1,4 +1,4 @@
 export interface UserRepositoryError {
     message: string,
-    code?: string
+    code: string
 }
