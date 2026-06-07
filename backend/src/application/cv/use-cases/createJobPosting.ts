@@ -1,36 +1,18 @@
 import { JobPostingFactory } from "src/domain/offers/factories/JobPosting.factory.ts";
 import { IJobPostingRepository } from "src/domain/offers/repositories/IJobPostingRepository.ts";
 import { GenericError } from "src/domain/shared/errors/Generic.error.js";
-import { Result } from "src/domain/shared/types/Result.ts";
+import { Err, Ok, Result } from "src/domain/shared/types/Result.ts";
+import { JobPostingCreationParams } from "../types/JobPostingCreationParams.js";
 
-export interface CreateJobPostingParams {
-    title: string
-    body: string
-    contactDetails?: {
-        name?: string
-        phoneNumber?: string
-        email?: string
-    }
-    requirements?: string[]
-}
+export async function createJobPosting(params: JobPostingCreationParams, jobPostingRepository: IJobPostingRepository): Promise<Result<{ uuid: string }, GenericError>> {
 
-export async function createJobPosting(
-    params: CreateJobPostingParams,
-    jobPostingRepository: IJobPostingRepository
-): Promise<Result<{ uuid: string }, GenericError>> {
-    const jobPosting = JobPostingFactory.create(
-        "",
-        params.title,
-        params.body,
-        params.contactDetails ?? {},
-        params.requirements ? new Set(params.requirements) : undefined
+    const jobPosting = JobPostingFactory.create(params.uuid, params.title, params.body, params.contactDetails,
+        params.company, params.location, params.salary, params.requirements
     )
 
     const result = await jobPostingRepository.save(jobPosting)
 
-    if (!result.ok) {
-        return { ok: false, error: { message: result.error.message, code: result.error.code } }
-    }
+    if (!result.ok) return Err(result.error)
 
-    return { ok: true, value: { uuid: result.value } }
+    return Ok({ uuid: result.value })
 }

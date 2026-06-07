@@ -4,13 +4,14 @@ import { IAIClient } from "src/domain/shared/ports/IAIClient.ts"
 import { CandidateFactory } from "src/domain/offers/factories/Candidate.factory.ts"
 import { ICandidateRepository } from "src/domain/offers/repositories/ICandidateRepository.ts"
 import { getFileByPath } from "src/infrastructure/services/getFileByPath.ts"
+import { GenericError } from "src/domain/shared/errors/Generic.error.js"
+import { Candidate } from "src/domain/offers/aggregates/Candidate.ts"
+import { Err, Ok, Result } from "src/domain/shared/types/Result.ts"
+import { toCommonErrorHandle } from "src/domain/shared/helpers/ToCommonErrorHandle.ts"
 
 // This function parses a CV to create a new Candidate and after a new application.
-export async function candidateParse(
-    filePath: string,
-    vlm: IAIClient,
-    candidateRepository: ICandidateRepository,
-    data: { name: string, email: string, phoneNum?: string, website?: string }) {
+export async function candidateParse(filePath: string, vlm: IAIClient, candidateRepository: ICandidateRepository,
+                                     data: { name: string, email: string, phoneNum?: string, website?: string }): Promise<Result<Candidate, GenericError>> {
     // Await receiving a CV.
     const service = new cvToB64Service()
     const promptService = new PromptService()
@@ -23,7 +24,7 @@ export async function candidateParse(
     const adaptedImage = await service.exec(file, filename)
 
     if (!adaptedImage.ok) {
-        return { ok: false, error: { message: adaptedImage.error.message, code: adaptedImage.error.code } }
+        return Err({ message: adaptedImage.error.message, code: adaptedImage.error.code })
     }
     
     const result = await vlm.generate({
@@ -34,9 +35,7 @@ export async function candidateParse(
         stream: false
     })
 
-    if (!result) {
-        return { ok: false, error: { message: "Couldn't adapt that image", code: "ERR_OLLAMA_VLM_PARSING" } }
-    }
+    if (!result) return Err({ message: "Couldn't adapt that image", code: "ERR_OLLAMA_VLM_PARSING" })
 
     try {
         const raw = result
@@ -68,16 +67,12 @@ export async function candidateParse(
         
             const saveResult = await candidateRepository.save(candidate)
 
-            if (!saveResult.ok) return { ok: false, error: { message: saveResult.error.message, code: saveResult.error.code } }
+            if (!saveResult.ok) return Err(saveResult.error)
             
             candidate.setUuid(saveResult.value)
 
-        return { ok: true, value: candidate }
+        return Ok(candidate)
     } catch (err) {
-        if (err instanceof Error) {
-            return { ok: false, error: { message: err.message, code: "ERR_CV_CANT_PARSE" } }
-        } else {
-            return { ok: false, error: { message: "Unknown error", code: "ERR_CV_CANT_PARSE" } }
-        }
+        return Err(toCommonErrorHandle(err, 'ERR_APPLICATION_SUBMISSION'))
     }    
 }

@@ -1,15 +1,23 @@
-import { Result } from "src/domain/shared/types/Result.ts";
+import { Err, Ok, Result } from "src/domain/shared/types/Result.ts";
 import { GenericError } from "src/domain/shared/errors/Generic.error.js";
-import queues from "src/infrastructure/bull/queues/bootstrap.ts";
+import { IApplicationQueue } from "src/application/ports/IApplicationQueue.ts";
+import { IJobPostingRepository } from "src/domain/offers/repositories/IJobPostingRepository.ts";
+import { toCommonErrorHandle } from "src/domain/shared/helpers/ToCommonErrorHandle.ts";
 
 export async function startApplication(
-    data: { jobPostingUUID: string, filePath: string, name: string, email: string, phoneNum?: string, website?: string }): Promise<Result<void, GenericError>> {
+    data: { jobPostingUUID: string, filePath: string, name: string, email: string, phoneNum?: string, website?: string }, 
+    queue: IApplicationQueue,
+    jobPostingRepository: IJobPostingRepository
+    ): Promise<Result<void, GenericError>> {
     try {
-        await queues.ProcessJobApplication.add('ProcessJobApplication', data)
-        return { ok: true, value: undefined }
+        const existingOffer = await jobPostingRepository.getByUUID(data.jobPostingUUID)
+        if (!existingOffer.ok) return Err(existingOffer.error)
+        
+        await queue.schedule(data)
+
+        return Ok(undefined)
     } catch (err) {
-        if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_START_JOB_APPLICATION" }  }
-        return { ok: false, error: { message: 'Unknown error', code: "ERR_START_JOB_APPLICATION" } }
+        return Err(toCommonErrorHandle(err, 'ERR_START_JOB_APPLICATION'))
     }
 
 }
