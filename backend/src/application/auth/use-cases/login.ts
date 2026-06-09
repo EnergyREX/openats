@@ -31,13 +31,13 @@ export async function login (
 
   // After that, generate booth tokens and return them
   const refreshToken = await jwt.sign({
-    uuid: user.getUUID(), 
+    uuid: user.getUUID().toPrimitive(), 
     email: user.getEmail(),
     type: 'refresh'
   }, { expiresIn: "7d" })
 
   const accessToken = await jwt.sign({
-    uuid: user.getUUID(),
+    uuid: user.getUUID().toPrimitive(),
     roles: rolesUuids,
     type: 'access'
   }, { expiresIn: "30m" })
