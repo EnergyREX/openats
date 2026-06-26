@@ -10,13 +10,8 @@ http:
     type: json
     data: |-
       {
-        "title": "",
-        "body": "",
-        "contactDetails": {
-          "name": "",
-          "email": "",
-          "phoneNumber": ""
-        }
+        "title": "Senior Backend Engineer — Platform Team",
+        "body": "Buscamos un ingeniero backend senior para unirse a nuestro equipo de plataforma. Trabajarás diseñando e implementando servicios escalables en Node.js y TypeScript, tomando decisiones de arquitectura y colaborando con un equipo distribuido 100% remoto. Valoramos experiencia con PostgreSQL, APIs REST y patrones como DDD o arquitectura hexagonal."
       }
   auth: inherit
 
