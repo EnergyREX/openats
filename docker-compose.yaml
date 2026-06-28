@@ -45,6 +45,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       db:
         condition: service_healthy
@@ -64,11 +65,28 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
     restart: always
 
 volumes:
