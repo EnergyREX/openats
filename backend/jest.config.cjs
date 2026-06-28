@@ -8,6 +8,8 @@ module.exports = {
       "ts-jest",
       {
         useESM: true,
+        // Usa el tsconfig específico de tests (carga los tipos de Jest).
+        tsconfig: "tsconfig.test.json",
       },
     ],
   },

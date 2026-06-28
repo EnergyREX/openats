@@ -1,0 +1,17 @@
+{
+  // Hereda toda la config de la app y solo AÑADE lo necesario para tests.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Carga los tipos globales del runner (it, describe, expect, jest...)
+    // y los de Node. Esto solo aplica al compilar los tests.
+    "types": ["jest", "node"],
+    // ts-jest transpila cada archivo por separado (no hace type-check global),
+    // así que este modo es el correcto y silencia el warning de module nodenext.
+    "isolatedModules": true,
+    // En tests es habitual relajar esto: a veces declaras helpers o params
+    // que no usas en todos los casos sin que sea un error real.
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src/**/*"]
+}
