@@ -5,22 +5,245 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+
+  /* Neutral — pure gray, sin tinte frío ni cálido */
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+
+  /* Forest Green — interactivo, crecimiento, confianza orgánica */
+  --color-forest-50:  #f2f7f2;
+  --color-forest-100: #e0ecdf;
+  --color-forest-200: #c0d9bf;
+  --color-forest-300: #95be93;
+  --color-forest-400: #669f64;
+  --color-forest-500: #4a8248;
+  --color-forest-600: #386737;
+  --color-forest-700: #2b502a;
+  --color-forest-800: #1d3620;
+  --color-forest-900: #132214;
+  --color-forest-950: #0a120b;
+
+  /* Amber — emissive, acción, calidez */
+  --color-amber-50:  #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-amber-950: #451a03;
+
+  --text-light: #171717;
+  --text-dark:  #f5f5f5;
+  --text-muted-dark: #737373;
+
+  --global-font-size: 1rem;
+}
+
+@theme {
+
+  --color-surface-base:    var(--color-neutral-950);
+  --color-surface-raised:  var(--color-neutral-900);
+  --color-surface-overlay: var(--color-neutral-800);
+
+  --color-interactive:       var(--color-forest-400);
+  --color-interactive-hover: var(--color-forest-300);
+  --color-interactive-muted: var(--color-forest-600);
+
+  --color-emissive:       var(--color-amber-400);
+  --color-emissive-soft:  var(--color-amber-900);
+  --color-emissive-glow:  var(--color-amber-300);
+
+  --color-text-primary:   var(--text-dark);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-muted:     var(--text-muted-dark);
+  --color-text-inverse:   var(--text-light);
+
+  --color-border-subtle:   var(--color-neutral-800);
+  --color-border-default:  var(--color-neutral-700);
+  --color-border-strong:   var(--color-forest-700);
+  --color-border-emissive: var(--color-amber-600);
+
+  --font-size-base: var(--global-font-size);
+
+  /* Tipografía editorial — Playfair (display) + Hanken Grotesk (cuerpo) */
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-sans:    var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+
+    --color-surface-base:    var(--color-neutral-50);
+    --color-surface-raised:  var(--color-neutral-100);
+    --color-surface-overlay: var(--color-neutral-200);
+
+    --color-interactive:       var(--color-forest-600);
+    --color-interactive-hover: var(--color-forest-700);
+    --color-interactive-muted: var(--color-forest-400);
+
+    --color-emissive:       var(--color-amber-500);
+    --color-emissive-soft:  var(--color-amber-100);
+    --color-emissive-glow:  var(--color-amber-400);
+
+    --color-text-primary:   var(--text-light);
+    --color-text-secondary: var(--color-neutral-600);
+    --color-text-muted:     var(--color-neutral-500);
+    --color-text-inverse:   var(--text-dark);
+
+    --color-border-subtle:   var(--color-neutral-200);
+    --color-border-default:  var(--color-neutral-300);
+    --color-border-strong:   var(--color-forest-300);
+    --color-border-emissive: var(--color-amber-400);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #f5f5f5;
   }
+}
+
+/* Manual theme overrides — higher specificity than media queries */
+:root[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --color-surface-base:    var(--color-neutral-50);
+  --color-surface-raised:  var(--color-neutral-100);
+  --color-surface-overlay: var(--color-neutral-200);
+
+  --color-interactive:       var(--color-forest-600);
+  --color-interactive-hover: var(--color-forest-700);
+  --color-interactive-muted: var(--color-forest-400);
+
+  --color-emissive:       var(--color-amber-500);
+  --color-emissive-soft:  var(--color-amber-100);
+  --color-emissive-glow:  var(--color-amber-400);
+
+  --color-text-primary:   var(--text-light);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-muted:     var(--color-neutral-500);
+  --color-text-inverse:   var(--text-dark);
+
+  --color-border-subtle:   var(--color-neutral-200);
+  --color-border-default:  var(--color-neutral-300);
+  --color-border-strong:   var(--color-forest-300);
+  --color-border-emissive: var(--color-amber-400);
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+
+  --color-surface-base:    var(--color-neutral-950);
+  --color-surface-raised:  var(--color-neutral-900);
+  --color-surface-overlay: var(--color-neutral-800);
+
+  --color-interactive:       var(--color-forest-400);
+  --color-interactive-hover: var(--color-forest-300);
+  --color-interactive-muted: var(--color-forest-600);
+
+  --color-emissive:       var(--color-amber-400);
+  --color-emissive-soft:  var(--color-amber-900);
+  --color-emissive-glow:  var(--color-amber-300);
+
+  --color-text-primary:   var(--text-dark);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-text-muted:     var(--text-muted-dark);
+  --color-text-inverse:   var(--text-light);
+
+  --color-border-subtle:   var(--color-neutral-800);
+  --color-border-default:  var(--color-neutral-700);
+  --color-border-strong:   var(--color-forest-700);
+  --color-border-emissive: var(--color-amber-600);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Selección con el acento ámbar de la marca */
+::selection {
+  background: var(--color-emissive);
+  color: var(--color-neutral-950);
+}
+
+/* Scrollbar que se funde con el tema activo (usa los mismos tokens que cambian
+   con prefers-color-scheme y con [data-theme]). Firefox via scrollbar-* y
+   WebKit/Chromium via ::-webkit-scrollbar. */
+.scrollbar-themed {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+.scrollbar-themed::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scrollbar-themed::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-default);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-strong);
+}
+
+/* Display editorial: ligaduras y números de estilo antiguo para textura */
+.font-display {
+  font-feature-settings: 'liga' 1, 'dlig' 1;
+}
+
+/* Grano sutil para dar atmósfera orgánica a superficies grandes (hero, footer) */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hero-pattern {
+  background-color: var(--color-surface-overlay);
+  background-image: url('./hero-pattern.svg');
+  background-repeat: repeat;
+}
+
+/* Reveal escalonado de carga (animation-delay por elemento) */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; }
 }
