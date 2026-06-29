@@ -5,12 +5,12 @@ import { IAIClient } from "src/domain/shared/ports/IAIClient.ts";
 import { IPromptService } from "src/domain/shared/ports/IPromptService.ts";
 import { ICandidateRepository } from "src/domain/offers/repositories/ICandidateRepository.ts";
 import { IJobPostingRepository } from "src/domain/offers/repositories/IJobPostingRepository.ts";
-import { IApplicationRepository } from "src/domain/offers/repositories/IApplicationRepository.ts";
 
 import { candidateParse } from "./candidateParse.ts";
-import { createApplication } from "./createApplication.ts";
+import { createApplication } from "./createCandidacy.ts";
 
-import { postulationData } from "../types/postulationData.js";
+import { postulationData } from "../../types/postulationData.js";
+import { ICandidacyRepository } from "src/domain/offers/repositories/ICandidacyRepository.ts";
 
 export class PostulationOrchestrator {
     constructor (
@@ -19,7 +19,7 @@ export class PostulationOrchestrator {
         private promptService: IPromptService,
         private candidateRepository: ICandidateRepository,
         private jobPostingRepository: IJobPostingRepository,
-        private applicationRepository: IApplicationRepository
+        private candidacyRepository: ICandidacyRepository
     ) {}
 
     async exec(data: postulationData): Promise<Result<void, GenericError>> {
@@ -31,7 +31,7 @@ export class PostulationOrchestrator {
         const candidate = await this.candidateRepository.getByEmail(data.email)
         let candidateData;
 
-        // If not exists, then create parse him
+        // If not exists, then create a new candidate and try to parse it
         if (!candidate.ok) {
             candidateData = await candidateParse(data.filePath, this.vlm, this.candidateRepository, 
                             { name: data.name, email: data.email, phoneNum: data.phoneNum, website: data.website })
@@ -42,17 +42,17 @@ export class PostulationOrchestrator {
         if (!candidateData.ok) return Err(candidateData.error)
 
         // Check if the application exists
-        const application = await this.applicationRepository.getByCandidateAndOfferUUID(candidateData.value!.getUuid(), data.jobPostingUUID)
+        const candidacy = await this.candidacyRepository.getByCandidateAndOfferUUID(candidateData.value!.getUuid(), data.jobPostingUUID)
 
         // If exists, end process
-        if (application.ok) return Ok(undefined)
+        if (candidacy.ok) return Ok(undefined)
 
         // Else, create a new one
         return createApplication(
         candidateData.value!.getUuid(), data.jobPostingUUID,
         this.candidateRepository,
         this.jobPostingRepository,
-        this.applicationRepository,
+        this.candidacyRepository,
         this.llm, this.promptService)
 
     }

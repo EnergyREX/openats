@@ -4,9 +4,9 @@ import { Result, Err, Ok } from "src/domain/shared/types/Result.ts";
 import { Role } from "src/domain/users/aggregates/Role.ts";
 import { IRoleRepository } from "src/domain/users/repositories/IRoleRepository.ts";
 
-export async function getRoles(repo: IRoleRepository): Promise<Result<Role[], GenericError>> {
+export async function getUserRoles(userUuid: string, repo: IRoleRepository): Promise<Result<Role[], GenericError>> {
     try {
-        const data = await repo.getAll()
+        const data = await repo.getByUserUUID(userUuid)
         if (!data.ok) return Err(data.error)
         return Ok(data.value)
     } catch (err) {

@@ -2,7 +2,7 @@ import { Err, Ok, Result } from "src/domain/shared/types/Result.ts";
 import { GenericError } from "src/domain/shared/errors/Generic.error.js";
 import { IApplicationQueue } from "src/application/ports/IApplicationQueue.ts";
 import { IJobPostingRepository } from "src/domain/offers/repositories/IJobPostingRepository.ts";
-import { toCommonErrorHandle } from "src/domain/shared/helpers/ToCommonErrorHandle.ts";
+import { toError } from "src/domain/shared/helpers/ToError.ts";
 
 export async function startApplication(
     data: { jobPostingUUID: string, filePath: string, name: string, email: string, phoneNum?: string, website?: string }, 
@@ -17,7 +17,7 @@ export async function startApplication(
 
         return Ok(undefined)
     } catch (err) {
-        return Err(toCommonErrorHandle(err, 'ERR_START_JOB_APPLICATION'))
+        return Err(toError(err, 'ERR_START_JOB_APPLICATION'))
     }
 
 }

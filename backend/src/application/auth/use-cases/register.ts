@@ -4,7 +4,7 @@ import { IUserRepository } from "../../../domain/users/repositories/IUserReposit
 import { RegisterError } from "../errors/register.error.ts";
 import { User } from "src/domain/users/aggregates/User.ts";
 import { IMailService } from "src/application/ports/IMailService.ts";
-import { toCommonErrorHandle } from "src/domain/shared/helpers/ToCommonErrorHandle.ts";
+import { toError } from "src/domain/shared/helpers/ToError.ts";
 
 export async function register(name: string, email: string, password: string, 
     repository: IUserRepository, hasher: IPasswordHasher, mailService: IMailService): Promise<Result<void, RegisterError>> {
@@ -28,10 +28,10 @@ export async function register(name: string, email: string, password: string,
         }
 
         //* Still needs some work, such as adding a template and put inside an email.
-        mailService.sendMail('no-reply', user.getEmail(), "Your verification code", `Your verification code is ${verificationCode}. It will expire in 24h.` )
+        mailService.sendMail('no-reply', user.getEmail().getValue(), "Your verification code", `Your verification code is ${verificationCode}. It will expire in 24h.` )
 
         return Ok(undefined)
     } catch (err) {
-        return Err(toCommonErrorHandle(err, 'ERR_USER_REGISTER_FAILED'))
+        return Err(toError(err, 'ERR_USER_REGISTER_FAILED'))
     }
 }

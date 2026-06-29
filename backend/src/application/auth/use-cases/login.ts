@@ -47,7 +47,7 @@ export async function login (
   return Ok(
     {
       uuid: user.getUUID().toPrimitive(),
-      email: user.getEmail(),
+      email: user.getEmail().getValue(),
       tokens: {
         accessToken,
         refreshToken

@@ -1,4 +1,4 @@
-import { cvToB64Service } from "../../../infrastructure/services/cvToB64.ts"
+import { cvToB64Service } from "../../../../infrastructure/services/cvToB64.ts"
 import { PromptService } from "src/infrastructure/ai/PromptService.ts"
 import { IAIClient } from "src/domain/shared/ports/IAIClient.ts"
 import { CandidateFactory } from "src/domain/offers/factories/Candidate.factory.ts"
@@ -7,7 +7,7 @@ import { getFileByPath } from "src/infrastructure/services/getFileByPath.ts"
 import { GenericError } from "src/domain/shared/errors/Generic.error.js"
 import { Candidate } from "src/domain/offers/aggregates/Candidate.ts"
 import { Err, Ok, Result } from "src/domain/shared/types/Result.ts"
-import { toCommonErrorHandle } from "src/domain/shared/helpers/ToCommonErrorHandle.ts"
+import { toError } from "src/domain/shared/helpers/ToError.ts"
 
 // This function parses a CV to create a new Candidate and after a new application.
 export async function candidateParse(filePath: string, vlm: IAIClient, candidateRepository: ICandidateRepository,
@@ -73,6 +73,6 @@ export async function candidateParse(filePath: string, vlm: IAIClient, candidate
 
         return Ok(candidate)
     } catch (err) {
-        return Err(toCommonErrorHandle(err, 'ERR_APPLICATION_SUBMISSION'))
+        return Err(toError(err, 'ERR_APPLICATION_SUBMISSION'))
     }    
 }
