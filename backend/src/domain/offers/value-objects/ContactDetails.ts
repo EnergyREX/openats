@@ -31,5 +31,4 @@ export class ContactDetails {
     getWebsite() { return this.website }
     getGithub() { return this.github }
     getLinkedin() { return this.linkedin }
-    getName() { return this.name }
 }

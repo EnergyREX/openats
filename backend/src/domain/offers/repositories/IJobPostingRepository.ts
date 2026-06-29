@@ -10,6 +10,7 @@ export interface IJobPostingRepository {
 
     getAll(): Promise<Result<JobPosting[], getJobPostingError>>
     getByUUID(uuid: string): Promise<Result<JobPosting, getJobPostingError>>
+    count(): Promise<number>
 
     update(value: JobPosting): Promise<Result<void, updateJobPostingError>>
     delete(uuid: string): Promise<Result<void, deleteJobPostingError>>

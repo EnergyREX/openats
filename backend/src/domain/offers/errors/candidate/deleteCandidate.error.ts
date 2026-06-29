@@ -1,4 +1,4 @@
 export interface deleteCandidateError {
     message: string,
-    code?: "ERR_DELETE_CANDIDATE"
+    code: "ERR_DELETE_CANDIDATE"
 }

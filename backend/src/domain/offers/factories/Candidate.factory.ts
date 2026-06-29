@@ -1,5 +1,7 @@
 import { ContactDetails } from "../value-objects/ContactDetails.ts"
 import { Candidate, CandidateCertification, CandidateEducation, CandidateLanguage, CandidateProject, WorkExperience } from "../aggregates/Candidate.ts"
+import { CandidateVolunteering } from "../types/CandidateVolunteering.js"
+import { CandidateAdditionalInfo } from "../types/CandidateAdditionalInfo.js"
 
 type ContactDetailsParams = {
     phoneNumber?: string
@@ -24,8 +26,8 @@ export class CandidateFactory {
         education?: CandidateEducation[],
         certifications?: CandidateCertification[],
         languages?: CandidateLanguage[],
-        volunteering?: string[],
-        additionalInfo?: string[]
+        volunteering?: CandidateVolunteering,
+        additionalInfo?: CandidateAdditionalInfo
     ): Candidate {
         const contact = new ContactDetails(
             contactDetails.phoneNumber,

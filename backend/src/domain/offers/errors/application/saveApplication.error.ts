@@ -1,4 +1,4 @@
 export interface saveApplicationError {
     message: string,
-    code?: "ERR_SAVE_APPLICATION"
+    code: "ERR_SAVE_APPLICATION"
 }

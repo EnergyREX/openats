@@ -12,6 +12,7 @@ export interface ICandidateRepository {
     getByUUID(uuid: string): Promise<Result<Candidate, getCandidateError>>
     getInOffer(uuid: string): Promise<Result<Candidate[], getCandidateError>>
     getByEmail(email: string): Promise<Result<Candidate, getCandidateError>>
+    count(): Promise<number>
 
     update(value: Candidate): Promise<Result<void, updateCandidateError>>
     delete(uuid: string): Promise<Result<void, deleteCandidateError>>

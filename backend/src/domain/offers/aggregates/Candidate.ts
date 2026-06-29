@@ -1,3 +1,5 @@
+import { CandidateAdditionalInfo } from "../types/CandidateAdditionalInfo.js";
+import { CandidateVolunteering } from "../types/CandidateVolunteering.js";
 import { ContactDetails } from "../value-objects/ContactDetails.ts";
 
 export interface WorkExperience {
@@ -45,9 +47,11 @@ export class Candidate {
         private readonly education?: CandidateEducation[],
         private readonly certifications?: CandidateCertification[],
         private readonly languages?: CandidateLanguage[],
-        private readonly volunteering?: string[],
-        private readonly additionalInfo?: string[],
+        private readonly volunteering?: CandidateVolunteering,
+        private readonly additionalInfo?: CandidateAdditionalInfo,
     ) { }
+
+
 
     toJson(): unknown { return {
         uuid: this.uuid,
@@ -97,7 +101,8 @@ export class Candidate {
     getEducation(): CandidateEducation[] | undefined { return this.education }
     getCertifications(): CandidateCertification[] | undefined { return this.certifications }
     getLanguages(): CandidateLanguage[] | undefined { return this.languages }
-    getVolunteering(): string[] | undefined { return this.volunteering }
-    getAdditionalInfo(): string[] | undefined { return this.additionalInfo }
+    getVolunteering(): unknown | undefined { return this.volunteering }
+    getAdditionalInfo(): unknown | undefined { return this.additionalInfo }
     getCvPath(): string { return this.cvPath }
+
 }
