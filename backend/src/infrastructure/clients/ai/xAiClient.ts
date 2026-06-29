@@ -11,13 +11,16 @@ export class xAIClient extends HttpClient implements IAIClient {
     private xai;
 
     constructor() {
+        const apiKey = process.env.AI_API_KEY
+        if (!apiKey) {
+            throw new Error("AI_API_KEY is not set. Define it in backend/.env to use the 'xai' provider.")
+        }
+
         super('https://api.x.ai', {
-            Authorization: `Bearer ${process.env.XAI_KEY}`
+            Authorization: `Bearer ${apiKey}`
         })
 
-        this.xai = createXai({
-            apiKey: process.env.XAI_KEY
-        })
+        this.xai = createXai({ apiKey })
     }
 
     async models(): Promise<unknown> {
@@ -33,9 +36,9 @@ export class xAIClient extends HttpClient implements IAIClient {
         }]
 
         if (params.image) {
-            const imgContent: ImagePart = { 
+            const imgContent: ImagePart = {
                 type: "image",
-                image: params.image,
+                image: Array.isArray(params.image) ? params.image[0] : params.image,
                 mediaType: 'image/png'
             }
 

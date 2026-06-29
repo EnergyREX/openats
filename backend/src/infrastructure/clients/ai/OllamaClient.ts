@@ -17,7 +17,7 @@ export class OllamaClient extends HttpClient implements IAIClient {
             model: params.model, 
             system: params.system,
             prompt: params.prompt,
-            images: [params.image],
+            images: params.image,
             stream: params.stream,
             temperature: params.temperature
         })
