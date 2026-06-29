@@ -9,26 +9,16 @@ const permissions = async(fastify: FastifyInstance) => {
 
     fastify.decorate('hasPermission', (permission: string) => {
         return async (req: FastifyRequest, reply: FastifyReply) => {
-            const authHeader = req.headers.authorization;
-            if (!authHeader || !authHeader?.startsWith('Bearer ')) {
-                return reply.code(401).send({ error: 'Unauthorized'})
+            const decodedAccess = req.user as jwtData
+
+            for (const roleUuid of decodedAccess.roles) {
+                const result = await roleCache.getPermissions(roleUuid)
+                if (!result.ok) continue
+
+                if (result.value.some(p => p.getName() === permission)) return
             }
 
-            const accessToken = authHeader.slice(7);
-
-            if (!accessToken) return reply.code(401).send({ ok: false, error: { message: "No access token provided", code: "ERR_PREHDL_NO_JWT" } })
-
-            const decodedAccess: jwtData = fastify.jwt.decode(accessToken)
-            
-            for (const roleUuid of decodedAccess.roles) {                                                                   
-                const result = await roleCache.getPermissions(roleUuid)
-                if (!result.ok) continue                                                                                    
-                            
-                const hasPermission = result.value.some(p => p.getName() === permission)                                    
-                if (hasPermission) return
-            }                                                                                                               
-                            
-            return reply.code(403).send({ ok: false, error: { message: 'Forbidden', code: 'ERR_PREHDL_FORBIDDEN' } })  
+            return reply.code(403).send({ ok: false, error: { message: 'Forbidden', code: 'ERR_PREHDL_FORBIDDEN' } })
         }
     })
 }

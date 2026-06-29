@@ -2,6 +2,7 @@ import 'dotenv/config';
 import fp from 'fastify-plugin';
 import jwt from '@fastify/jwt'
 import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
+import { jwtData } from '../types/jwtData.js';
 
 const auth: FastifyPluginAsync = async (fastify) => {
   const secret = process.env.JWT_SECRET_KEY
@@ -16,12 +17,12 @@ const auth: FastifyPluginAsync = async (fastify) => {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         await request.jwtVerify()
-      } catch (err) {
-        if (err instanceof Error) {
-          reply.code(401).send({ ok: false, message: 'Unauthorized' })
-        } else {
-          reply.code(400).send({ ok: false, message: "Unknown error" })
+        const payload = request.user as jwtData
+        if (payload.type !== 'access') {
+          return reply.code(401).send({ ok: false, message: 'Unauthorized' })
         }
+      } catch {
+        return reply.code(401).send({ ok: false, message: 'Unauthorized' })
       }
   })
 
