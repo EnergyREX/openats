@@ -17,9 +17,9 @@ Schema:
   "education": [{ "title": string, "institution": string, "duration": string, "gpa": string }],
   "certifications": [{ "title": string, "institution": string, "duration": string }],
   "projects": [{ "title": string, "description": string }],
-  "volunteering": string[],
+  "volunteering": [{ "organization": string, "role": string, "duration": string, "description": string }],
   "languages": [{ "language": string, "level": string }],
-  "additional_info": string[]
+  "additional_info": [{ "title": string, "description": string }]
 }
 
 Rules
@@ -48,5 +48,13 @@ title
 - The candidate's professional title only (e.g. "Fullstack Developer").
 - Do NOT include technology stack in the title.
 
+volunteering
+- Each volunteering experience must be a SEPARATE object. Never merge multiple roles into one.
+- "duration" is the time range as shown in the CV (e.g. "2020 - 2022", "Summer 2021").
+- "description" is optional context about the activity. Use "" if absent.
+
 additional_info
-- Any relevant info that doesn't fit other fields: driving license, vehicle availability, work permit, etc.
+- Any relevant info that doesn't fit other fields: driving license, vehicle availability, work permit, awards, publications, hobbies, etc.
+- "title" is the category label (e.g. "Driving license", "Awards", "Hobbies").
+- "description" is the actual content for that category.
+- Group related items under the same title when natural.
