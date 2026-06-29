@@ -3,19 +3,16 @@ import { Email } from "../value-objects/Email.ts"
 import { Password } from "../value-objects/Password.ts"
 
 export class User {
-  private readonly uuid: UUID
-  private readonly name: string
-  private readonly email: Email
-  private readonly password: Password
-  private readonly verified: boolean
 
-  constructor(uuid: UUID, name: string, email: Email, password: Password, verified: boolean) {
-      this.uuid = uuid
-      this.name = name
-      this.email = email
-      this.password = password
-      this.verified = verified
-  }
+
+  constructor(
+      private readonly uuid: UUID,
+      private readonly name: string,
+      private readonly email: Email,
+      private readonly password: Password,
+      private readonly verified: boolean,
+      private readonly joinDate: Date,
+  ) { }
 
   static create(uuid: string, name: string, email: string, password: string, verified: boolean): User {  
     const userEmail = new Email(email)
@@ -26,17 +23,19 @@ export class User {
           name, 
           userEmail, 
           userPassword, 
-          verified) 
+          verified,
+          new Date()) 
 
         return user
-    }
+  }
 
   getUser() { return this }
   getUUID(): UUID { return this.uuid }
   getName(): string { return this.name }
-  getEmail(): string { return this.email.getValue() }
+  getEmail(): Email { return this.email }
   getPassword(): string { return this.password.getValue() }
   isVerified(): boolean { return this.verified }
+  getJoinDate(): Date { return this.joinDate }
 
   toJson() {
     return {
