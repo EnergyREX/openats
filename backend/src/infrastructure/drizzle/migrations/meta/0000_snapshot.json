@@ -1,11 +1,11 @@
 {
-  "id": "22464e12-eb29-4188-974a-f2c04c9bd2fb",
+  "id": "8e712a42-4f60-4ef0-af25-eceb7109702f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.applications": {
-      "name": "applications",
+    "public.candidacies": {
+      "name": "candidacies",
       "schema": "",
       "columns": {
         "uuid": {
@@ -26,43 +26,60 @@
           "primaryKey": false,
           "notNull": true
         },
+        "status": {
+          "name": "status",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_phase_order": {
+          "name": "current_phase_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
         "score": {
           "name": "score",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": -1
         },
         "annotations": {
           "name": "annotations",
-          "type": "jsonb[]",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'[]'::jsonb"
         },
-        "discarded": {
-          "name": "discarded",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "suggested_status": {
-          "name": "suggested_status",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "discard_reason": {
-          "name": "discard_reason",
+        "reject_reason": {
+          "name": "reject_reason",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "''"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "applications_offer_uuid_job_posting_uuid_fk": {
-          "name": "applications_offer_uuid_job_posting_uuid_fk",
-          "tableFrom": "applications",
+        "candidacies_offer_uuid_job_posting_uuid_fk": {
+          "name": "candidacies_offer_uuid_job_posting_uuid_fk",
+          "tableFrom": "candidacies",
           "tableTo": "job_posting",
           "columnsFrom": [
             "offer_uuid"
@@ -73,9 +90,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "applications_candidate_uuid_candidates_uuid_fk": {
-          "name": "applications_candidate_uuid_candidates_uuid_fk",
-          "tableFrom": "applications",
+        "candidacies_candidate_uuid_candidates_uuid_fk": {
+          "name": "candidacies_candidate_uuid_candidates_uuid_fk",
+          "tableFrom": "candidacies",
           "tableTo": "candidates",
           "columnsFrom": [
             "candidate_uuid"
@@ -195,13 +212,13 @@
         },
         "volunteering": {
           "name": "volunteering",
-          "type": "jsonb[]",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
         "additional_info": {
           "name": "additional_info",
-          "type": "jsonb[]",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -238,6 +255,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "owner_uuid": {
+          "name": "owner_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "title": {
           "name": "title",
           "type": "varchar",
@@ -250,27 +273,53 @@
           "primaryKey": false,
           "notNull": true
         },
-        "recruiter_name": {
-          "name": "recruiter_name",
-          "type": "varchar",
+        "recruiter_contact": {
+          "name": "recruiter_contact",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
-        "recruiter_phone": {
-          "name": "recruiter_phone",
-          "type": "varchar",
+        "company": {
+          "name": "company",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
-        "recruiter_email": {
-          "name": "recruiter_email",
-          "type": "varchar",
+        "location": {
+          "name": "location",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "salary": {
+          "name": "salary",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "requirements": {
+          "name": "requirements",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "job_posting_owner_uuid_users_uuid_fk": {
+          "name": "job_posting_owner_uuid_users_uuid_fk",
+          "tableFrom": "job_posting",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -309,7 +358,7 @@
         "token": {
           "name": "token",
           "type": "varchar",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "expires_at": {
@@ -520,7 +569,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

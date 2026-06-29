@@ -1,12 +1,14 @@
-CREATE TABLE "applications" (
+CREATE TABLE "candidacies" (
 	"uuid" uuid PRIMARY KEY NOT NULL,
 	"offer_uuid" uuid NOT NULL,
 	"candidate_uuid" uuid NOT NULL,
-	"score" integer,
-	"annotations" jsonb[],
-	"discarded" boolean DEFAULT false,
-	"suggested_status" varchar,
-	"discard_reason" text
+	"status" varchar NOT NULL,
+	"current_phase_order" integer DEFAULT 0 NOT NULL,
+	"score" integer DEFAULT -1 NOT NULL,
+	"annotations" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"reject_reason" text DEFAULT '' NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "candidates" (
@@ -26,19 +28,22 @@ CREATE TABLE "candidates" (
 	"education" jsonb,
 	"certifications" jsonb,
 	"languages" jsonb,
-	"volunteering" jsonb[],
-	"additional_info" jsonb[],
+	"volunteering" jsonb,
+	"additional_info" jsonb,
 	"cv_url" varchar,
 	CONSTRAINT "candidates_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE "job_posting" (
 	"uuid" uuid PRIMARY KEY NOT NULL,
+	"owner_uuid" uuid NOT NULL,
 	"title" varchar NOT NULL,
 	"body" text NOT NULL,
-	"recruiter_name" varchar,
-	"recruiter_phone" varchar,
-	"recruiter_email" varchar
+	"recruiter_contact" jsonb,
+	"company" jsonb,
+	"location" jsonb,
+	"salary" jsonb,
+	"requirements" jsonb
 );
 --> statement-breakpoint
 CREATE TABLE "permissions" (
@@ -47,7 +52,7 @@ CREATE TABLE "permissions" (
 );
 --> statement-breakpoint
 CREATE TABLE "revoked_tokens" (
-	"token" varchar NOT NULL,
+	"token" varchar PRIMARY KEY NOT NULL,
 	"expires_at" integer NOT NULL,
 	"created_at" integer NOT NULL
 );
@@ -75,11 +80,13 @@ CREATE TABLE "users" (
 	"password" varchar NOT NULL,
 	"verification_code" varchar,
 	"verified" boolean DEFAULT false NOT NULL,
-	"joined_at" date DEFAULT now()
+	"joined_at" date DEFAULT now(),
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-ALTER TABLE "applications" ADD CONSTRAINT "applications_offer_uuid_job_posting_uuid_fk" FOREIGN KEY ("offer_uuid") REFERENCES "public"."job_posting"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "applications" ADD CONSTRAINT "applications_candidate_uuid_candidates_uuid_fk" FOREIGN KEY ("candidate_uuid") REFERENCES "public"."candidates"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidacies" ADD CONSTRAINT "candidacies_offer_uuid_job_posting_uuid_fk" FOREIGN KEY ("offer_uuid") REFERENCES "public"."job_posting"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidacies" ADD CONSTRAINT "candidacies_candidate_uuid_candidates_uuid_fk" FOREIGN KEY ("candidate_uuid") REFERENCES "public"."candidates"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "job_posting" ADD CONSTRAINT "job_posting_owner_uuid_users_uuid_fk" FOREIGN KEY ("owner_uuid") REFERENCES "public"."users"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "roles_permissions" ADD CONSTRAINT "roles_permissions_role_uuid_roles_uuid_fk" FOREIGN KEY ("role_uuid") REFERENCES "public"."roles"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "roles_permissions" ADD CONSTRAINT "roles_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "roles_users" ADD CONSTRAINT "roles_users_user_uuid_users_uuid_fk" FOREIGN KEY ("user_uuid") REFERENCES "public"."users"("uuid") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

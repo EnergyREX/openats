@@ -17,7 +17,7 @@ export const candidates = pgTable('candidates', {
     education: jsonb('education'),
     certifications: jsonb('certifications'),
     languages: jsonb('languages'),
-    volunteering: jsonb('volunteering').array(),
-    additionalInfo: jsonb('additional_info').array(),
+    volunteering: jsonb('volunteering'),
+    additionalInfo: jsonb('additional_info'),
     cvUrl: varchar('cv_url')
 })

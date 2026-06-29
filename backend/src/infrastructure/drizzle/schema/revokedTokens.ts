@@ -1,7 +1,7 @@
 import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
 
 export const revokedTokens = pgTable('revoked_tokens', {
-    token: varchar('token').notNull(),
+    token: varchar('token').notNull().primaryKey(),
     expires_at: integer('expires_at').notNull(),
     created_at: integer('created_at').notNull()
 })
