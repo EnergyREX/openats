@@ -1,4 +1,4 @@
 export interface PdfToImageError {
     message: string,
-    code?: "ERR_CV_IMAGE_PARSE"
+    code: "ERR_CV_IMAGE_PARSE"
 }

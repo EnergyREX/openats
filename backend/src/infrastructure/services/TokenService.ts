@@ -2,7 +2,7 @@ import { ITokenService } from "src/application/ports/ITokenService.ts";
 import { GenericError } from "src/domain/shared/errors/Generic.error.js";
 import { Err, Ok, Result } from "src/domain/shared/types/Result.ts";
 import jwt from 'jsonwebtoken'
-import { toRepositoryError } from "src/domain/shared/helpers/ToErrorRepository.ts";
+import { toError } from "src/domain/shared/helpers/ToError.ts";
 
 export class TokenService implements ITokenService {
     private readonly privateKey = process.env.JWT_SECRET_KEY!
@@ -15,7 +15,7 @@ export class TokenService implements ITokenService {
         try {
             return Ok(jwt.verify(token, this.privateKey, { algorithms: ['HS256'] }) as T)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_TOKEN_VERIFICATION'))
+            return Err(toError(err, 'ERR_TOKEN_VERIFICATION'))
         }
     }
 

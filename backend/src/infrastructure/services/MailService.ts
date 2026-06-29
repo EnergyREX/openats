@@ -2,7 +2,7 @@ import nodemailer from "nodemailer"
 import { Err, Ok, Result } from 'src/domain/shared/types/Result.ts'
 import { GenericError } from 'src/domain/shared/errors/Generic.error.js'
 import { MailTransporterStrategy } from './strategies/mail/MailTransporterStrategy.ts';
-import { toCommonErrorHandle } from 'src/domain/shared/helpers/ToCommonErrorHandle.ts';
+import { toError } from 'src/domain/shared/helpers/ToError.ts';
 import { SESStrategy } from './strategies/mail/SESStrategy.ts';
 import { SMTPStrategy } from './strategies/mail/SMTPStrategy.ts';
 import { IMailService } from 'src/application/ports/IMailService.ts';
@@ -27,14 +27,14 @@ export class MailService implements IMailService {
             await this.transporter.verify()
             return Ok(undefined)                                                                                    
         } catch (err) {                         
-            return Err(toCommonErrorHandle(err, 'ERR_MAILSERVICE_TRANSPORTER_VERIFICATION'))
+            return Err(toError(err, 'ERR_MAILSERVICE_TRANSPORTER_VERIFICATION'))
         }  
     }
 
     async sendMail(fromName: string, sendTo: string, subject: string, text?: string, template?: string): Promise<Result<void, GenericError>> {
         try {
             const conn = await this.verify()
-            if (!conn.ok) return Err(toCommonErrorHandle(conn.error.message, conn.error.code))
+            if (!conn.ok) return Err(toError(conn.error.message, conn.error.code))
             await this.transporter.sendMail({
                 from: `"${fromName}"<${this.sender}>`,
                 to: sendTo,
@@ -45,7 +45,7 @@ export class MailService implements IMailService {
 
             return Ok(undefined)
         } catch (err) {
-            return Err(toCommonErrorHandle(err, 'ERR_MAILSERVICE_SEND'))
+            return Err(toError(err, 'ERR_MAILSERVICE_SEND'))
         }
     }
 }

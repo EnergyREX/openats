@@ -1,5 +1,5 @@
 import { fromBuffer } from "pdf2pic";
-import { Result } from "../../domain/shared/types/Result.ts";
+import { Ok, Result } from "../../domain/shared/types/Result.ts";
 import { PdfToImageError } from "./errors/PdfToImage.error.ts";
 
 export class cvToB64Service { 
@@ -12,7 +12,7 @@ export class cvToB64Service {
         }
 
         const extension = parts[1].toLowerCase()
-        const supportedFiles = ['pdf', 'jpg', 'png']
+        const supportedFiles = ['pdf', 'docx', 'jpg', 'png']
 
         if (!supportedFiles.includes(extension)) {
             throw new Error('Supported files are only pdf, jpg or png.')
@@ -29,7 +29,7 @@ export class cvToB64Service {
         if (fileType == 'pdf') {
             data = await fromBuffer(buffer, {
                 quality: 100,
-                density: 300,
+                density: 200,
                 preserveAspectRatio: true,
                 format: 'png',
             }).bulk(-1, { responseType: 'base64' })
@@ -37,7 +37,7 @@ export class cvToB64Service {
             const pages = data.map(page => page.base64)
             console.log(`Pages: ${pages.length}`)
 
-            return { ok: true, value: pages.toString() }
+            return Ok(pages.toString())
         }
 
         // Convert to base64
