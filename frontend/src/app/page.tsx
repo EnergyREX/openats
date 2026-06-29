@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Display, Heading, Body, Lead, Eyebrow } from '@/components/primitives/Typography'
-import { FEATURECARDS } from '@/constants/FEATURECARDS'
+import { FEATURECARDS } from '@/constants/FeatureCards'
 
 export default function Home() {
   return (
