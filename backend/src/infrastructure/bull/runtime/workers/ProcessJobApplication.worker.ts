@@ -1,12 +1,14 @@
 import { Worker } from "bullmq";
-import { PostulationOrchestrator } from "src/application/cv/use-cases/PostulationOrchestrator.ts";
+import { PostulationOrchestrator } from "src/application/cv/use-cases/aiParsePipeline/PostulationOrchestrator.ts";
 import { redisConnection } from "../../config/redisConnection.ts";
 
 export function ProcessJobApplicationWorker(postulationOrchestrator: PostulationOrchestrator) {
     const worker = new Worker('ProcessJobApplication',
         async (job) => {
-            const data = await job.data
+            const data = job.data
             const result = await postulationOrchestrator.exec(data)
+            console.log(result)
+            if (!result.ok) throw new Error(`${result.error.code} - ${result.error.message}`)
             return result
         },
         {
@@ -23,6 +25,6 @@ export function ProcessJobApplicationWorker(postulationOrchestrator: Postulation
     })
 
     worker.on('failed', (job) => {
-        console.log(`[BullMQ] - completed candidate parsing job ${job!.name} failed.`)
+        console.log(`[BullMQ] - failed candidate parsing job ${job!.name} failed.`)
     })
 }
