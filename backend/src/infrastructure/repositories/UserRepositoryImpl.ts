@@ -1,6 +1,6 @@
 import db from '../../config/database.ts'
 import { Err, Ok, Result } from '../../domain/shared/types/Result.ts'
-import { toRepositoryError } from '../../domain/shared/helpers/ToErrorRepository.ts'
+import { toError } from '../../domain/shared/helpers/ToError.ts'
 import { User } from '../../domain/users/aggregates/User.ts'
 import { UserRepositoryError } from '../../domain/users/errors/UserRepositoryError.ts'
 import { IUserRepository } from '../../domain/users/repositories/IUserRepository.ts'
@@ -15,13 +15,13 @@ export class UserRepositoryImpl implements IUserRepository {
             await db.insert(users).values({
                 uuid: user.getUUID().toPrimitive(),
                 name: user.getName(),
-                email: user.getEmail(),
+                email: user.getEmail().getValue(),
                 password: user.getPassword(),
                 verificationCode: verificationCode
             })
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_CREATE'))
+            return Err(toError(err, 'ERR_USER_CREATE'))
         }
     }
 
@@ -30,7 +30,7 @@ export class UserRepositoryImpl implements IUserRepository {
             await db.update(users).set({ verified: true, verificationCode: "" }).where(eq(users.verificationCode, verificationCode))
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_NO_VERIFICATION_CODE'))
+            return Err(toError(err, 'ERR_USER_NO_VERIFICATION_CODE'))
         }
     }
 
@@ -46,7 +46,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
             return Ok(data[0].verificationCode)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_VERCODE_NOT_FOUND'))
+            return Err(toError(err, 'ERR_USER_VERCODE_NOT_FOUND'))
         }
     }
 
@@ -62,7 +62,7 @@ export class UserRepositoryImpl implements IUserRepository {
                 return Err({ message: "User not found", code: "ERR_USER_NOT_FOUND" })
             }
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_NOT_FOUND'))
+            return Err(toError(err, 'ERR_USER_NOT_FOUND'))
         }
     }
 
@@ -78,7 +78,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
             return Ok(user)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_NOT_FOUND'))
+            return Err(toError(err, 'ERR_USER_NOT_FOUND'))
         }
     }
 
@@ -91,7 +91,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_CHANGE_NAME'))
+            return Err(toError(err, 'ERR_USER_CHANGE_NAME'))
         }
     }
 
@@ -108,7 +108,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_CHANGE_PASSWORD'))
+            return Err(toError(err, 'ERR_USER_CHANGE_PASSWORD'))
         }
     }
 
@@ -125,7 +125,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_CHANGE_EMAIL'))
+            return Err(toError(err, 'ERR_USER_CHANGE_EMAIL'))
         }
     }
 
@@ -138,7 +138,7 @@ export class UserRepositoryImpl implements IUserRepository {
             })
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_INVALIDATE_REFRESH'))
+            return Err(toError(err, 'ERR_USER_INVALIDATE_REFRESH'))
         }
     }
 
@@ -157,7 +157,7 @@ export class UserRepositoryImpl implements IUserRepository {
             await db.delete(users).where(eq(users.uuid, uuid))
             return Ok(undefined)
         } catch (err) {
-            return Err(toRepositoryError(err, 'ERR_USER_DELETE'))
+            return Err(toError(err, 'ERR_USER_DELETE'))
         }
     }
 }

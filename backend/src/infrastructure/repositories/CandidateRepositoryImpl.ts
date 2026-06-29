@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import db from "../../config/database.ts";
 import { Candidate, CandidateCertification, CandidateEducation, CandidateLanguage, CandidateProject, WorkExperience } from "../../domain/offers/aggregates/Candidate.ts";
 import { deleteCandidateError } from "../../domain/offers/errors/candidate/deleteCandidate.error.ts";
@@ -7,10 +7,12 @@ import { saveCandidateError } from "../../domain/offers/errors/candidate/saveCan
 import { updateCandidateError } from "../../domain/offers/errors/candidate/updateCandidate.error.ts";
 import { CandidateFactory } from "../../domain/offers/factories/Candidate.factory.ts";
 import { ICandidateRepository } from "../../domain/offers/repositories/ICandidateRepository.ts";
-import { Result } from "../../domain/shared/types/Result.ts";
+import { Err, Ok, Result } from "../../domain/shared/types/Result.ts";
+import { toError } from "../../domain/shared/helpers/ToError.ts";
 import { candidates } from "../drizzle/schema/candidates.ts";
-import { applications } from "../drizzle/schema/applications.ts";
-
+import { candidacies } from "../drizzle/schema/candidacies.ts";
+import { CandidateVolunteering } from "src/domain/offers/types/CandidateVolunteering.js";
+import { CandidateAdditionalInfo } from "src/domain/offers/types/CandidateAdditionalInfo.js";
 export class CandidateRepositoryImpl implements ICandidateRepository {
 
     private mapRowToCandidate(d: typeof candidates.$inferSelect): Candidate {
@@ -25,7 +27,7 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
                 email: d.email ?? undefined,
                 website: d.website ?? undefined,
                 github: d.github ?? undefined,
-                linkedin: d.linkedin ?? undefined,
+                linkedin: d.linkedin ?? undefined
             },
             d.skills,
             d.cvUrl ?? "",
@@ -34,8 +36,8 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
             d.education as CandidateEducation[] | undefined,
             d.certifications as CandidateCertification[] | undefined,
             d.languages as CandidateLanguage[] | undefined,
-            d.volunteering ?? undefined,
-            d.additionalInfo ?? undefined
+            d.volunteering as CandidateVolunteering | undefined,
+            d.additionalInfo as CandidateAdditionalInfo | undefined
         )
     }
 
@@ -63,13 +65,9 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
                 cvUrl: value.getCvPath() ?? null,
             }).returning({ uuid: candidates.uuid })
 
-            return { ok: true, value: uuid }
+            return Ok(uuid)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_CANDIDATE_STORE" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_CANDIDATE_STORE" } }
-            }
+            return Err(toError(err, 'ERR_CANDIDATE_STORE'))
         }
     }
 
@@ -77,35 +75,29 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
         try {
             const rawData = await db.select().from(candidates)
             const data: Candidate[] = rawData.map((d) => this.mapRowToCandidate(d))
-            return { ok: true, value: data }
+            return Ok(data)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: "ERR_GET_CANDIDATE" } }
-            } else {
-                return { ok: false, error: { message: "Unknown error", code: "ERR_GET_CANDIDATE" } }
-            }
+            return Err(toError(err, 'ERR_GET_CANDIDATE'))
         }
     }
 
     async getByUUID(uuid: string): Promise<Result<Candidate, getCandidateError>> {
         try {
             const [raw] = await db.select().from(candidates).where(eq(candidates.uuid, uuid))
-            if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_CANDIDATE" } }
-            return { ok: true, value: this.mapRowToCandidate(raw) }
+            if (!raw) return Err({ message: "Not found", code: "ERR_GET_CANDIDATE" })
+            return Ok(this.mapRowToCandidate(raw))
         } catch (err) {
-            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_CANDIDATE" } }
-            return { ok: false, error: { message: "Unknown error", code: "ERR_GET_CANDIDATE" } } 
+            return Err(toError(err, 'ERR_GET_CANDIDATE'))
         }
     }
 
     async getByEmail(email: string): Promise<Result<Candidate, getCandidateError>> {
         try {
             const [raw] = await db.select().from(candidates).where(eq(candidates.email, email))
-            if (!raw) return { ok: false, error: { message: "Not found", code: "ERR_GET_CANDIDATE" } }
-            return { ok: true, value: this.mapRowToCandidate(raw) }
+            if (!raw) return Err({ message: "Not found", code: "ERR_GET_CANDIDATE" })
+            return Ok(this.mapRowToCandidate(raw))
         } catch (err) {
-            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_CANDIDATE" } }
-            return { ok: false, error: { message: "Unknown error", code: "ERR_GET_CANDIDATE" } } 
+            return Err(toError(err, 'ERR_GET_CANDIDATE'))
         }
     }
 
@@ -113,14 +105,18 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
         try {
             const rawData = await db.select()
                 .from(candidates)
-                .innerJoin(applications, eq(applications.candidateUuid, candidates.uuid))
-                .where(eq(applications.offerUuid, offerUuid))
+                .innerJoin(candidacies, eq(candidacies.candidateUuid, candidates.uuid))
+                .where(eq(candidacies.offerUuid, offerUuid))
 
-            return { ok: true, value: rawData.map(r => this.mapRowToCandidate(r.candidates)) }
+            return Ok(rawData.map(r => this.mapRowToCandidate(r.candidates)))
         } catch (err) {
-            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_GET_CANDIDATE" } }
-            return { ok: false, error: { message: "Unknown error", code: "ERR_GET_CANDIDATE" } } 
+            return Err(toError(err, 'ERR_GET_CANDIDATE'))
         }
+    }
+
+    async count(): Promise<number> {
+        const [{ value }] = await db.select({ value: count() }).from(candidates)
+        return value
     }
 
     async update(value: Candidate): Promise<Result<void, updateCandidateError>> {
@@ -146,20 +142,18 @@ export class CandidateRepositoryImpl implements ICandidateRepository {
                     additionalInfo: value.getAdditionalInfo() ?? null,
                 })
                 .where(eq(candidates.uuid, value.getUuid()))
-            return { ok: true, value: undefined }
+            return Ok(undefined)
         } catch (err) {
-            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_JOB_CANDIDATE_UPDATE" } }
-            return { ok: false, error: { message: "Unknown error", code: "ERR_JOB_CANDIDATE_UPDATE" } } 
+            return Err(toError(err, 'ERR_CANDIDATE_UPDATE'))
         }
     }
 
     async delete(uuid: string): Promise<Result<void, deleteCandidateError>> {
         try {
             await db.delete(candidates).where(eq(candidates.uuid, uuid))
-            return { ok: true, value: undefined }
+            return Ok(undefined)
         } catch (err) {
-            if (err instanceof Error) return { ok: false, error: { message: err.message, code: "ERR_DELETE_CANDIDATE" } }
-            return { ok: false, error: { message: "Unknown error", code: "ERR_DELETE_CANDIDATE" } } 
+            return Err(toError(err, 'ERR_DELETE_CANDIDATE'))
         }
     }
 }

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import db from '../../config/database.ts'
 import { GenericError } from '../../domain/shared/errors/Generic.error.js'
-import { Result } from '../../domain/shared/types/Result.ts'
+import { Err, Ok, Result } from '../../domain/shared/types/Result.ts'
 import { Role } from '../../domain/users/aggregates/Role.ts'
 import { IRoleRepository } from '../../domain/users/repositories/IRoleRepository.ts'
 import { Permission } from '../../domain/users/value-objects/Permission.ts'
@@ -9,22 +9,21 @@ import { permissions } from '../drizzle/schema/permissions.ts'
 import { roles } from '../drizzle/schema/roles.ts'
 import { rolesPermissions } from '../drizzle/schema/roles_permissions.ts'
 import { rolesUsers } from '../drizzle/schema/roles_users.ts'
+import { toError } from 'src/domain/shared/helpers/ToError.ts'
 
 export class RoleRepositoryImpl implements IRoleRepository {
 
     async save(value: Role): Promise<Result<string, GenericError>> {
         try {
-            await db.insert(roles).values({
+            const [{ uuid }] = await db.insert(roles).values({
                 uuid: value.getUUID(),
                 name: value.getName(),
                 description: value.getDescription(),
-            })
-            return { ok: true, value: value.getUUID() }
+            }).returning({ uuid: roles.uuid })
+
+            return Ok(uuid)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_CREATE' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_CREATE' } }
+            return Err(toError(err, 'ERR_ROLE_CREATE'))
         }
     }
 
@@ -42,12 +41,9 @@ export class RoleRepositoryImpl implements IRoleRepository {
                 .leftJoin(rolesPermissions, eq(rolesPermissions.role_uuid, roles.uuid))
                 .leftJoin(permissions, eq(permissions.id, rolesPermissions.permission_id))
 
-            return { ok: true, value: this.groupRowsIntoRoles(rows) }
+            return Ok(this.groupRowsIntoRoles(rows))
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_GET_ALL' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_GET_ALL' } }
+            return Err(toError(err, 'ERR_ROLE_GET_ALL'))
         }
     }
 
@@ -67,7 +63,7 @@ export class RoleRepositoryImpl implements IRoleRepository {
                 .where(eq(roles.uuid, uuid))
 
             if (rows.length === 0) {
-                return { ok: false, error: { message: 'Role not found', code: 'ERR_ROLE_NOT_FOUND' } }
+                return Err({ message: 'Role not found', code: 'ERR_ROLE_NOT_FOUND' })
             }
 
             const perms = rows
@@ -75,12 +71,9 @@ export class RoleRepositoryImpl implements IRoleRepository {
                 .map(r => Permission.create(r.permissionId!, r.permissionName!))
 
             const role = Role.create(rows[0].uuid, rows[0].name, rows[0].description ?? '', perms)
-            return { ok: true, value: role }
+            return Ok(role)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_NOT_FOUND' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_NOT_FOUND' } }
+            return Err(toError(err, 'ERR_ROLE_NOT_FOUND'))
         }
     }
 
@@ -100,12 +93,9 @@ export class RoleRepositoryImpl implements IRoleRepository {
                 .leftJoin(permissions, eq(permissions.id, rolesPermissions.permission_id))
                 .where(eq(rolesUsers.user_uuid, userUuid))
 
-            return { ok: true, value: this.groupRowsIntoRoles(rows) }
+            return Ok(this.groupRowsIntoRoles(rows))
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_GET_BY_USER' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_GET_BY_USER' } }
+            return Err(toError(err, 'ERR_ROLE_GET_BY_USER'))
         }
     }
 
@@ -114,24 +104,18 @@ export class RoleRepositoryImpl implements IRoleRepository {
             await db.update(roles)
                 .set({ name: value.getName(), description: value.getDescription() })
                 .where(eq(roles.uuid, value.getUUID()))
-            return { ok: true, value: undefined }
+            return Ok(undefined)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_UPDATE' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_UPDATE' } }
+            return Err(toError(err, 'ERR_ROLE_UPDATE'))
         }
     }
 
     async delete(uuid: string): Promise<Result<void, GenericError>> {
         try {
             await db.delete(roles).where(eq(roles.uuid, uuid))
-            return { ok: true, value: undefined }
+            return Ok(undefined)
         } catch (err) {
-            if (err instanceof Error) {
-                return { ok: false, error: { message: err.message, code: 'ERR_ROLE_DELETE' } }
-            }
-            return { ok: false, error: { message: 'Unknown error', code: 'ERR_ROLE_DELETE' } }
+            return Err(toError(err, 'ERR_ROLE_DELETE'))
         }
     }
 
