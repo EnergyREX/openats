@@ -1,0 +1,16 @@
+cat > /home/openats/openats/Caddyfile << 'EOF'
+openats.energyrex.dev {
+    handle /api/* {
+        reverse_proxy backend:6500
+    }
+    handle {
+        reverse_proxy frontend:3000
+    }
+    encode gzip zstd
+
+    log {
+        output file /var/log/caddy/openats.log
+        format json
+    }
+}
+EOF
