@@ -3,18 +3,18 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
     volumes:
       - db_data:/var/lib/postgresql/data
+    ports:
+      - "5445:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks: [internal]
-    # sin "ports" — solo accesible dentro de la red docker
 
   redis:
     image: redis:7-alpine
@@ -22,18 +22,23 @@ services:
     command: redis-server
     volumes:
       - redis_data:/data
+    ports:
+      - "6390:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks: [internal]
-    # sin "ports"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "6500:6500"
     env_file:
       - ./backend/.env
     environment:
@@ -41,22 +46,19 @@ services:
       - DB_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - NODE_ENV=production
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: always
-    networks: [internal]
-    # sin "ports" — Caddy lo alcanza como "backend:6500"
 
   bull:
     build:
       context: ./backend
       dockerfile: Dockerfile.worker
     volumes:
-      - worker_storage:/app/src/infrastructure/storage
+      - ./backend/src/infrastructure/storage:/app/src/infrastructure/storage
     env_file:
       - ./backend/.env
     environment:
@@ -64,50 +66,29 @@ services:
       - DB_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - NODE_ENV=production
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: always
-    networks: [internal]
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
     env_file:
       - ./frontend/.env
-    environment:
-      - NODE_ENV=production
     depends_on:
       - backend
     restart: always
-    networks: [internal]
-    # sin "ports"
-
-  caddy:
-    image: caddy:2-alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - backend
-      - frontend
-    networks: [internal]
-
-networks:
-  internal:
 
 volumes:
   db_data:
   redis_data:
-  worker_storage:
-  caddy_data:
-  caddy_config:
