@@ -1,4 +1,3 @@
-cat > /home/openats/openats/Caddyfile << 'EOF'
 openats.energyrex.dev {
     handle /api/* {
         reverse_proxy backend:6500
@@ -13,4 +12,3 @@ openats.energyrex.dev {
         format json
     }
 }
-EOF
