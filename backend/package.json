@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec tsx ./src/index.ts",
     "test": "jest",
+    "typecheck": "npx tsc --noEmit",
     "bull": "tsx ./src/infrastructure/bull/runtime/init.ts",
     "seed": "tsx ./src/infrastructure/drizzle/seed.ts"
   },
