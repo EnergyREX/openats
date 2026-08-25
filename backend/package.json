@@ -16,7 +16,7 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^3.0.29",
     "@ai-sdk/google": "^4.0.49",
-    "@ai-sdk/openai": "^4.0.45",
+    "@ai-sdk/openai": "^4.0.47",
     "@ai-sdk/xai": "^4.0.42",
     "@aws-sdk/client-ses": "^3.1063.0",
     "@aws-sdk/client-sesv2": "^3.1063.0",
