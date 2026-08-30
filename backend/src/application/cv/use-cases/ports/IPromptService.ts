@@ -1,4 +1,4 @@
-import { PromptsResponseType } from "../types/PromptsResponseType.js"
+import { PromptsResponseType } from "src/domain/shared/types/PromptsResponseType.js"
 
 export interface IPromptService {
     getParsingPrompts(): PromptsResponseType
