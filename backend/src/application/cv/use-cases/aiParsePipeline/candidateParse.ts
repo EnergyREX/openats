@@ -1,27 +1,27 @@
-import { cvToB64Service } from "../../../../infrastructure/services/cvToB64.ts"
-import { PromptService } from "src/infrastructure/ai/PromptService.ts"
 import { IAIClient } from "src/domain/shared/ports/IAIClient.ts"
 import { CandidateFactory } from "src/domain/offers/factories/Candidate.factory.ts"
 import { ICandidateRepository } from "src/domain/offers/repositories/ICandidateRepository.ts"
-import { getFileByPath } from "src/infrastructure/services/getFileByPath.ts"
 import { GenericError } from "src/domain/shared/errors/Generic.error.js"
 import { Candidate } from "src/domain/offers/aggregates/Candidate.ts"
 import { Err, Ok, Result } from "src/domain/shared/types/Result.ts"
 import { toError } from "src/domain/shared/helpers/ToError.ts"
+import { ICVToB64Service } from "../ports/ICVToB64Service.ts"
+import { IPromptService } from "../ports/IPromptService.ts"
+import { IGetFileByPath } from "../ports/IGetFileByPath.ts"
 
 // This function parses a CV to create a new Candidate and after a new application.
-export async function candidateParse(filePath: string, vlm: IAIClient, candidateRepository: ICandidateRepository,
-                                     data: { name: string, email: string, phoneNum?: string, website?: string }): Promise<Result<Candidate, GenericError>> {
+export async function candidateParse(
+    filePath: string, vlm: IAIClient, candidateRepository: ICandidateRepository,
+    cvToB64Service: ICVToB64Service, promptService: IPromptService, fileByPath: IGetFileByPath,
+    data: { name: string, email: string, phoneNum?: string, website?: string }): Promise<Result<Candidate, GenericError>> {
     // Await receiving a CV.
-    const service = new cvToB64Service()
-    const promptService = new PromptService()
     const filename = filePath.split('/').at(-1)!    
 
     const prompts = promptService.getParsingPrompts()
-    const file = await getFileByPath(filePath)
+    const file = await fileByPath.getFileByPath(filePath)
     
     // Parse the CV to create a new Candidate in db.
-    const adaptedImage = await service.exec(file, filename)
+    const adaptedImage = await cvToB64Service.exec(file, filename)
 
     if (!adaptedImage.ok) {
         return Err({ message: adaptedImage.error.message, code: adaptedImage.error.code })

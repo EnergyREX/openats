@@ -2,7 +2,7 @@ import { GenericError } from "src/domain/shared/errors/Generic.error.js";
 import { Result, Ok, Err } from "src/domain/shared/types/Result.ts";
 import { IAIClient } from "src/domain/shared/ports/IAIClient.ts";
 
-import { IPromptService } from "src/domain/shared/ports/IPromptService.ts";
+import { IPromptService } from "src/application/cv/use-cases/ports/IPromptService.ts";
 import { ICandidateRepository } from "src/domain/offers/repositories/ICandidateRepository.ts";
 import { IJobPostingRepository } from "src/domain/offers/repositories/IJobPostingRepository.ts";
 
@@ -11,12 +11,16 @@ import { createApplication } from "./createCandidacy.ts";
 
 import { postulationData } from "../../types/postulationData.js";
 import { ICandidacyRepository } from "src/domain/offers/repositories/ICandidacyRepository.ts";
+import { ICVToB64Service } from "../ports/ICVToB64Service.ts";
+import { IGetFileByPath } from "../ports/IGetFileByPath.ts";
 
 export class PostulationOrchestrator {
     constructor (
         private vlm: IAIClient,
         private llm: IAIClient, 
         private promptService: IPromptService,
+        private cvToBase64Service: ICVToB64Service,
+        private filePathService: IGetFileByPath,
         private candidateRepository: ICandidateRepository,
         private jobPostingRepository: IJobPostingRepository,
         private candidacyRepository: ICandidacyRepository
@@ -33,7 +37,7 @@ export class PostulationOrchestrator {
 
         // If not exists, then create a new candidate and try to parse it
         if (!candidate.ok) {
-            candidateData = await candidateParse(data.filePath, this.vlm, this.candidateRepository, 
+            candidateData = await candidateParse(data.filePath, this.vlm, this.candidateRepository, this.cvToBase64Service, this.promptService, this.filePathService,
                             { name: data.name, email: data.email, phoneNum: data.phoneNum, website: data.website })
         } else {
             candidateData = candidate

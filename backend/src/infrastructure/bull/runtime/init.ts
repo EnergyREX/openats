@@ -8,6 +8,10 @@ import { CandidacyRepositoryImpl } from "../../repositories/CandidacyRepositoryI
 import { OllamaClient } from "src/infrastructure/clients/ai/OllamaClient.ts";
 import { xAIClient } from "src/infrastructure/clients/ai/xAiClient.ts";
 import { IAIClient } from 'src/domain/shared/ports/IAIClient.ts';
+import { ICVToB64Service } from 'src/application/cv/use-cases/ports/ICVToB64Service.ts';
+import { cvToB64Service } from 'src/infrastructure/services/cvToB64.ts';
+import { IGetFileByPath } from 'src/application/cv/use-cases/ports/IGetFileByPath.ts';
+import { getFileByPath } from 'src/infrastructure/services/getFileByPath.ts';
 
 const provider = process.env.AI_PROVIDER
 
@@ -23,11 +27,16 @@ if (!aiStrategy[provider]) throw new Error('Unknown provider defined! Define one
 const aiClient = aiStrategy[provider]()
 
 const promptService = new PromptService()
+const cvToB64: ICVToB64Service = new cvToB64Service()
+const filePathServ: IGetFileByPath = new getFileByPath()
 const candidateRepository = new CandidateRepositoryImpl()
 const jobPostingRepository = new JobPostingRepositoryImpl()
 const candidacyRepository = new CandidacyRepositoryImpl()
 
-const postulationOrchestrator = new PostulationOrchestrator(aiClient, aiClient, promptService, candidateRepository, jobPostingRepository, candidacyRepository)
+const postulationOrchestrator = new PostulationOrchestrator(
+    aiClient, aiClient, 
+    promptService, cvToB64, filePathServ, 
+    candidateRepository, jobPostingRepository, candidacyRepository)
 
 export async function initWorkersAndSchedulers() {
     console.info('[BullMQ] - Initiating Queues and Workers...')
