@@ -1,23 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import container from "src/bootstrap/bootstrap.ts";
-import { Candidacy } from "src/domain/offers/aggregates/Candidacy.ts";
-
-// La Candidacy es un aggregate con getters (sin toJson propio): se aplana aquí,
-// resolviendo los value-objects UUID a su primitivo.
-function toCandidacyResponse(c: Candidacy) {
-    return {
-        uuid: c.getUuid().toPrimitive(),
-        offerUuid: c.getOfferUuid().toPrimitive(),
-        candidateUuid: c.getCandidateUuid().toPrimitive(),
-        status: c.getStatus(),
-        currentPhaseOrder: c.getCurrentPhaseOrder(),
-        score: c.getScore(),
-        annotations: c.getAnnotations(),
-        rejectionReason: c.getRejectionReason(),
-        createdAt: c.getCreationDate(),
-        updatedAt: c.getLastUpdateDate(),
-    }
-}
+import { toCandidacyResponse } from "./mappers/toCandidacyResponse.ts";
 
 export default async function (fastify: FastifyInstance) {
     fastify.get('/offers/:uuid/candidacies', {
