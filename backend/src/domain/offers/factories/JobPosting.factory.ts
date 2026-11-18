@@ -37,7 +37,8 @@ export class JobPostingFactory {
             period: string,
             equity: boolean
         },
-        requirements?: Set<string>
+        requirements?: Set<string>,
+        status: OfferStatus = OfferStatus.DRAFT
     ): JobPosting {
         const contactDetail = new ContactDetails(contactDetails.phoneNumber, contactDetails.address, contactDetails.email)
         const offerCompany = new Company(company.name, company.size, company.website, company.industry)
@@ -47,6 +48,6 @@ export class JobPostingFactory {
             new UUID(uuid), new UUID(ownerUuid), title, body, offerPipeline,
             contactDetail, offerCompany, offerLocation,
             offerSalary,
-            requirements ? requirements : new Set<string>, OfferStatus.DRAFT)
-    }  
+            requirements ? requirements : new Set<string>, status)
+    }
 }
