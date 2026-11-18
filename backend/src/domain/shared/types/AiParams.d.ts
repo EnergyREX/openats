@@ -1,5 +1,11 @@
 type AIParams = {
-    model: XaiChatModelId | string,
+    model: 
+        XaiChatModelId | 
+        OpenAIResponsesModelId | 
+        GoogleModelId | 
+        DeepSeekChatModelId | 
+        DeepSeekChatModelId | 
+        string,
     prompt: string,
     system?: string,
     image?: string | string[],
