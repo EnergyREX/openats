@@ -1,0 +1,1 @@
+ALTER TABLE "job_posting" ADD COLUMN "status" varchar DEFAULT 'DRAFT' NOT NULL;
