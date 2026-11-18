@@ -7,6 +7,7 @@ import { saveJobPostingError } from "../../domain/offers/errors/jobposting/saveJ
 import { updateJobPostingError } from "../../domain/offers/errors/jobposting/updateJobPosting.error.ts";
 import { JobPostingFactory } from "../../domain/offers/factories/JobPosting.factory.ts";
 import { OfferPipeline } from "../../domain/offers/value-objects/OfferPipeline.ts";
+import { OfferStatus } from "../../domain/offers/value-objects/OfferStatus.ts";
 import { IJobPostingRepository } from "../../domain/offers/repositories/IJobPostingRepository.ts";
 import { Err, Ok, Result } from "../../domain/shared/types/Result.ts";
 import { toError } from "../../domain/shared/helpers/ToError.ts";
@@ -25,7 +26,8 @@ export class JobPostingRepositoryImpl implements IJobPostingRepository {
                 (d.company ?? {}) as { name: string; size: string; website: string; industry: string },
                 (d.location ?? {}) as { city: string; country: string; modality: string },
                 (d.salary ?? {}) as { min: number; max: number; currency: string; period: string; equity: boolean },
-                new Set((d.requirements as string[] | null) ?? [])
+                new Set((d.requirements as string[] | null) ?? []),
+                OfferStatus[d.status as keyof typeof OfferStatus] ?? OfferStatus.DRAFT
         )
     }
 
@@ -59,6 +61,7 @@ export class JobPostingRepositoryImpl implements IJobPostingRepository {
                 equity: salary.hasEquity(),
             },
             requirements: [...value.getRequirements()],
+            status: OfferStatus[value.getStatus()],
         }
     }
 

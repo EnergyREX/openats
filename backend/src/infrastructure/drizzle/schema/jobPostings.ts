@@ -10,5 +10,6 @@ export const jobPostings = pgTable('job_posting', {
     company: jsonb('company'),
     location: jsonb('location'),
     salary: jsonb('salary'),
-    requirements: jsonb('requirements')
+    requirements: jsonb('requirements'),
+    status: varchar('status').notNull().default('DRAFT')
 })
