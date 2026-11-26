@@ -9,6 +9,7 @@ import candidacies from "./v1/candidacies.ts"
 import candidates from "./v1/candidates.ts"
 import users from "./v1/users.ts"
 import roles from "./v1/roles.ts"
+import settings from "./v1/settings.ts"
 
 const routes: FastifyPluginAsync = async (fastify: FastifyInstance) => {;
   await fastify.register(health, { prefix: '/api/v1/' })
@@ -19,6 +20,7 @@ const routes: FastifyPluginAsync = async (fastify: FastifyInstance) => {;
   await fastify.register(candidates, { prefix: '/api/v1/' })
   await fastify.register(users, { prefix: '/api/v1/' })
   await fastify.register(roles, { prefix: '/api/v1' })
+  await fastify.register(settings, { prefix: '/api/v1' })
 }
 
 export default fp(routes)
