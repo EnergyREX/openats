@@ -1,0 +1,629 @@
+{
+  "id": "69cf0fc2-ceb6-4278-a1ce-39fb78f9d401",
+  "prevId": "87060fcd-8b35-4a4a-811a-ac4e076ed0de",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.candidacies": {
+      "name": "candidacies",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "offer_uuid": {
+          "name": "offer_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidate_uuid": {
+          "name": "candidate_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_phase_order": {
+          "name": "current_phase_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": -1
+        },
+        "annotations": {
+          "name": "annotations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "reject_reason": {
+          "name": "reject_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "candidacies_offer_uuid_job_posting_uuid_fk": {
+          "name": "candidacies_offer_uuid_job_posting_uuid_fk",
+          "tableFrom": "candidacies",
+          "tableTo": "job_posting",
+          "columnsFrom": [
+            "offer_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "candidacies_candidate_uuid_candidates_uuid_fk": {
+          "name": "candidacies_candidate_uuid_candidates_uuid_fk",
+          "tableFrom": "candidacies",
+          "tableTo": "candidates",
+          "columnsFrom": [
+            "candidate_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.candidates": {
+      "name": "candidates",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "about": {
+          "name": "about",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skills": {
+          "name": "skills",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "website": {
+          "name": "website",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "github": {
+          "name": "github",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linkedin": {
+          "name": "linkedin",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "experience": {
+          "name": "experience",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projects": {
+          "name": "projects",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "education": {
+          "name": "education",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certifications": {
+          "name": "certifications",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "languages": {
+          "name": "languages",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "volunteering": {
+          "name": "volunteering",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "additional_info": {
+          "name": "additional_info",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "candidates_email_unique": {
+          "name": "candidates_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.job_posting": {
+      "name": "job_posting",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_uuid": {
+          "name": "owner_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recruiter_contact": {
+          "name": "recruiter_contact",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company": {
+          "name": "company",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "salary": {
+          "name": "salary",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "requirements": {
+          "name": "requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "job_posting_owner_uuid_users_uuid_fk": {
+          "name": "job_posting_owner_uuid_users_uuid_fk",
+          "tableFrom": "job_posting",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.permissions": {
+      "name": "permissions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.revoked_tokens": {
+      "name": "revoked_tokens",
+      "schema": "",
+      "columns": {
+        "token": {
+          "name": "token",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roles_permissions": {
+      "name": "roles_permissions",
+      "schema": "",
+      "columns": {
+        "role_uuid": {
+          "name": "role_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "permission_id": {
+          "name": "permission_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "roles_permissions_role_uuid_roles_uuid_fk": {
+          "name": "roles_permissions_role_uuid_roles_uuid_fk",
+          "tableFrom": "roles_permissions",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "role_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "roles_permissions_permission_id_permissions_id_fk": {
+          "name": "roles_permissions_permission_id_permissions_id_fk",
+          "tableFrom": "roles_permissions",
+          "tableTo": "permissions",
+          "columnsFrom": [
+            "permission_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roles_users": {
+      "name": "roles_users",
+      "schema": "",
+      "columns": {
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role_uuid": {
+          "name": "role_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "roles_users_user_uuid_users_uuid_fk": {
+          "name": "roles_users_user_uuid_users_uuid_fk",
+          "tableFrom": "roles_users",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "roles_users_role_uuid_roles_uuid_fk": {
+          "name": "roles_users_role_uuid_roles_uuid_fk",
+          "tableFrom": "roles_users",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "role_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roles": {
+      "name": "roles",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.settings": {
+      "name": "settings",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verification_code": {
+          "name": "verification_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified": {
+          "name": "verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "joined_at": {
+          "name": "joined_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

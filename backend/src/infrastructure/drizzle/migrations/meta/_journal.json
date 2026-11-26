@@ -15,6 +15,13 @@
       "when": 1783368867524,
       "tag": "0001_add_job_posting_status",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793660262814,
+      "tag": "0002_add_settings",
+      "breakpoints": true
     }
   ]
 }
